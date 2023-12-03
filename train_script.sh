@@ -1,4 +1,4 @@
-model_id=test
+model_id=transformer_more_scale
 model_name=transformer
 trainset=/data1/peizhongyi/applications/Goldwind_2020_Guangxi_CMA_001_trainset_target.csv
 validset=/data1/peizhongyi/applications/Goldwind_2020_Guangxi_CMA_001_validset_target.csv
@@ -12,6 +12,7 @@ pred_len=48
 interval=900
 timestamp_feature=h
 gpu=0
+epoch=50
 
 cmd="python main.py \
     --stage train \
@@ -29,6 +30,7 @@ cmd="python main.py \
     --pred_len ${pred_len} \
     --interval ${interval} \
     --timestamp_feature ${timestamp_feature} \
+    --train_epochs ${epoch} \
     --gpu ${gpu} "
 
 log=log/nohup_${model_id}.output

@@ -8,6 +8,7 @@ import torch.nn as nn
 class TransformerForecasting(GeneralForecasting):
     model_choices = {
             'transformer': Transformer,
+            'itransformer': iTransformer,
             }
 
     def __init__(self, args):
@@ -47,3 +48,4 @@ class TransformerForecasting(GeneralForecasting):
         train_loss = self.criterion(outputs, targets)
         self.writer.add_scalar('loss/train_loss', train_loss.item(), curr_iter)
         return train_loss
+

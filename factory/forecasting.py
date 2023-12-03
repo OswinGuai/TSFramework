@@ -38,7 +38,7 @@ class GeneralForecasting:
         self.optimizer = self._build_optimizer(self.model.parameters(), args)
         self.stepper = self._build_scheduler(self.optimizer)
     
-    def _build_dataloader(self, args, csv_path, batch_size, shuffle=True, num_workers=4, drop_last=True):
+    def _build_dataloader(self, args, csv_path, batch_size, shuffle=True, num_workers=4, drop_last=True, init_scaler=True):
         dataset = TimeseriesDataset(
             csv_path=csv_path,
             segment_len=(args.pred_len + args.seq_len),
@@ -46,7 +46,8 @@ class GeneralForecasting:
             target_cols=args.target_cols,
             datetime_col=args.datetime_col,
             interval=args.interval,
-            timestamp_feature=args.timestamp_feature)
+            timestamp_feature=args.timestamp_feature,
+            init_scaler=init_scaler)
 
         dataloader = DataLoader(
             dataset,
@@ -113,7 +114,7 @@ class GeneralForecasting:
             self.stepper.step()
 
     def eval(self, epoch):
-        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False)
+        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False)
         self.to_eval()
         outputs_list = []
         target_list = []
