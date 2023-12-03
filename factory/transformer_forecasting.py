@@ -1,17 +1,22 @@
-from factory.forecasting import ForecastingFactory
+from factory.forecasting import GeneralForecasting
 from models import *
 
 import torch
 import torch.nn as nn
 
 
-class TransformerForecasting(ForecastingFactory):
+class TransformerForecasting(GeneralForecasting):
     model_choices = {
-        'transformer': Transformer,
-    }
+            'transformer': Transformer,
+            }
 
     def __init__(self, args):
-        super(GeneralForecasting, self).__init__(args)
+        model_params = {
+            'enc_in': len(args.feature_cols.split(',')),
+            'dec_in': len(args.feature_cols.split(',')),
+            'c_out': len(args.target_cols.split(',')),
+            }
+        super().__init__(args, model_params)
         self.criterion = nn.MSELoss()
 
     def eval_metric(self, eval_outputs, truth_values, epoch):
@@ -27,17 +32,17 @@ class TransformerForecasting(ForecastingFactory):
         samples_enc = samples_batch
         datetimes_enc = datetimes_batch
         B, S, V = samples_enc.shape
-        samples_dec = torch.cat([samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device), dim=1)
-        datetimes_dec = torch.cat([datetimes_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device), dim=1)
-        outputs = self._forward(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+        samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
+        datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, datetimes_enc.shape[2]]).float().to(self.device)), 1)
+        outputs = self._forward(samples_enc, datetimes_enc,  samples_dec, datetimes_dec)
         return outputs
 
     def batch_loss(self, samples_batch, targets_batch, datetimes_batch, curr_iter):
         samples_enc = samples_batch[:,:self.args.seq_len,:]
-        datetimes_enc = datetimes_batch[:,:self.args.seq_len,:]
-        samples_dec = torch.cat([samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]], dim=1)
-        datetimes_dec = torch.cat([datetimes_enc[:, -self.args.label_len:, :], datetimes_batch[:, :-self.args.pred_len, :]], dim=1)
-        outputs = self._forward(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+        datetimes_enc = datetimes_batch[:,:self.args.seq_len]
+        samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]), 1)
+        datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], datetimes_batch[:, :-self.args.pred_len, :]), 1)
+        outputs = self._forward(samples_enc, datetimes_enc,  samples_dec, datetimes_dec)
         targets = targets_batch[:, -self.args.pred_len:, :]
         train_loss = self.criterion(outputs, targets)
         self.writer.add_scalar('loss/train_loss', train_loss.item(), curr_iter)

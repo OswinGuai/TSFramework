@@ -2,7 +2,7 @@ import argparse
 import torch
 import os
 
-from factory.general_forecasting import GeneralForecasting
+from factory.transformer_forecasting import TransformerForecasting
 
 torch.autograd.set_detect_anomaly(True)
 parser = argparse.ArgumentParser(description='Time Series Forecasting')
@@ -18,12 +18,13 @@ parser.add_argument('--testset_csv_path', type=str, required=True, help='')
 parser.add_argument('--datetime_col', type=str, help='')
 parser.add_argument('--feature_cols', type=str, help='')
 parser.add_argument('--target_cols', type=str, help='')
+parser.add_argument('--timestamp_feature', type=str, help='')
 
 
 parser.add_argument('--seq_len', type=int, default=96, help='input sequence length of encoder')
 parser.add_argument('--label_len', type=int, default=12, help='start token length of decoder')
 parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
-parser.add_argument('--granularity', type=int, help='')
+parser.add_argument('--interval', type=int, help='')
 
 parser.add_argument('--model_name', type=str, required=True, default='transformer')
 parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
@@ -58,7 +59,7 @@ if not isExists:
     os.makedirs(path)
 
 # set experiments
-factory_list = [GeneralForecasting]
+factory_list = [TransformerForecasting]
 forecasting_model = None
 for f in factory_list:
     if args.model_name in f.model_choices.keys():
@@ -71,9 +72,11 @@ if forecasting_model is None:
 if args.stage == 'train':
     print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
     forecasting_model.fit()
+    print('>>>>>>>end of training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
 elif args.stage == 'test':
     print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.model_id))
     pred_rmse = forecasting_model.eval()
+    print('>>>>>>>end of testing : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
 
 torch.cuda.empty_cache()
 
