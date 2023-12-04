@@ -10,13 +10,20 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, OneCycleLR
 import os
 import time
 import warnings
+import nni
 
 import numpy as np
 
+import threading
+
 warnings.filterwarnings('ignore')
 
+mutex = threading.Lock()
 
 class GeneralForecasting:
+    cache_dataset = {
+    }
+
     model_choices = {
         'default': None,
     }
@@ -27,6 +34,8 @@ class GeneralForecasting:
 
     def __init__(self, args, model_params={}):
         self.args = args
+        if 'hpo' in self.args and self.args.hpo == 'optuna':
+            self.trial = self.args.trial
         self.model_id = args.model_id
         self.device = self._acquire_device()
         self.base_path = os.path.join(args.checkpoints, self.model_id)
@@ -38,24 +47,33 @@ class GeneralForecasting:
         self.optimizer = self._build_optimizer(self.model.parameters(), args)
         self.stepper = self._build_scheduler(self.optimizer)
     
-    def _build_dataloader(self, args, csv_path, batch_size, shuffle=True, num_workers=4, drop_last=True, init_scaler=True):
+    def _create_data(self, args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True):
         dataset = TimeseriesDataset(
-            csv_path=csv_path,
-            segment_len=(args.pred_len + args.seq_len),
-            feature_cols=args.feature_cols,
-            target_cols=args.target_cols,
-            datetime_col=args.datetime_col,
-            interval=args.interval,
-            timestamp_feature=args.timestamp_feature,
-            init_scaler=init_scaler)
+                csv_path=csv_path,
+                segment_len=(args.pred_len + args.seq_len),
+                feature_cols=args.feature_cols,
+                target_cols=args.target_cols,
+                datetime_col=args.datetime_col,
+                interval=args.interval,
+                timestamp_feature=args.timestamp_feature,
+                init_scaler=init_scaler)
 
         dataloader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            num_workers=num_workers,
-            drop_last=drop_last)
+                dataset,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                num_workers=num_workers,
+                drop_last=drop_last)
         return dataset, dataloader
+
+    def _build_dataloader(self, args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True, key='none'):
+        if key != 'none':
+            with mutex:
+                if key not in self.cache_dataset.keys():
+                    self.cache_dataset[key] = self._create_data(args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True)
+                return self.cache_dataset[key]
+        else:
+            return self._create_data(args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True)
 
     def _build_optimizer(self, parameters, args):
         model_optim = self.optimizer_choices[args.optimizer](parameters, lr=args.lr)
@@ -73,7 +91,7 @@ class GeneralForecasting:
 
     def fit(self):
         time_now = time.time()
-        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size)
+        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
         total_iter = 0
         valid_loss = None
         best_valid_loss = None
@@ -101,6 +119,12 @@ class GeneralForecasting:
                     time_now = time.time()
 
             valid_loss = self.eval(epoch)
+            if 'hpo' in self.args and self.args.hpo == 'optuna':
+                # optuna
+                self.trial.report(valid_loss.item(), epoch)
+            elif 'hpo' in self.args and self.args.hpo == 'nni':
+                # nni
+                nni.report_intermediate_result(valid_loss.item())
             print("Epoch: {} | cost time: {} | valid_loss: {}".format(epoch + 1, time.time() - epoch_time, valid_loss))
             if best_valid_loss is None or valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
@@ -112,9 +136,12 @@ class GeneralForecasting:
                 print("Early stop with best valid_loss: {}".format(valid_loss))
                 break
             self.stepper.step()
+        if 'hpo' in self.args and self.args.hpo == 'nni':
+            nni.report_final_result(best_valid_loss.item())
+        return best_valid_loss.item()
 
     def eval(self, epoch):
-        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False)
+        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='valid')
         self.to_eval()
         outputs_list = []
         target_list = []

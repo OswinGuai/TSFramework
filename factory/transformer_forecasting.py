@@ -9,6 +9,7 @@ class TransformerForecasting(GeneralForecasting):
     model_choices = {
             'transformer': Transformer,
             'itransformer': iTransformer,
+            'patchtst': PatchTST,
             }
 
     def __init__(self, args):
