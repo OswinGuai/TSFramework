@@ -20,12 +20,9 @@ class LSTM(nn.Module):
                               bias=False)
         self.LSTM = torch.nn.LSTM(input_size=enc_in, hidden_size=self.hidden_size, num_layers=1,
                                   batch_first=True)
-        self.enc_embedding = DataEmbedding(enc_in, d_model, embed, 'h', dropout)
-        self.dec_embedding = DataEmbedding(dec_in, d_model, embed, 'h', dropout)
-        #self.projection = nn.Linear(self.hidden_size, c_out, bias=True)
-
-        self.projection_a = nn.Linear(d_model, 1, bias=True)
-        #self.projection_b = nn.Linear(dec_in + dec_in, 1, bias=True)
+        #self.enc_embedding = DataEmbedding(enc_in, d_model, embed, 'h', dropout)
+        #self.dec_embedding = DataEmbedding(dec_in, d_model, embed, 'h', dropout)
+        self.projection_a = nn.Linear(d_model, c_out, bias=True)
 
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
@@ -33,16 +30,9 @@ class LSTM(nn.Module):
         # enc_out = self.init(x_enc.permute(0, 2, 1)).transpose(1, 2)
         enc_out = x_enc#self.enc_embedding(x_enc, x_mark_enc)
         dec_out = x_dec#self.dec_embedding(x_dec, x_mark_dec)
-
         output, (h, c) = self.LSTM(torch.cat((enc_out,dec_out[:,-self.pred_len:,:]),dim=1))
-
-        #dec_out = self.projection(output)
-        #weather_outputs = self.projection_a(output)[:, -self.pred_len:, :]
-        #combined_features = torch.cat([x_dec[:, -self.pred_len:, :], weather_outputs], dim=2)
-        #wind_outputs = self.projection_b(combined_features)
-
         outputs = self.projection_a(output)[:, -self.pred_len:, :]
 
-        return None, outputs[:, -self.pred_len:, :]
+        return outputs[:, -self.pred_len:, :]
 
 

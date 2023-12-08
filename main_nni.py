@@ -1,6 +1,7 @@
 import argparse
 import torch
 from factory.transformer_forecasting import TransformerForecasting
+from factory.alumina_transformer_forecasting import AluminaTransformerForecasting
 import random
 import numpy as np
 import nni
@@ -18,10 +19,12 @@ np.random.seed(fix_seed)
 
 parser = argparse.ArgumentParser(description='Time Series Forecasting')
 
+parser.add_argument('--use_nni', action="store_true", help='status')
 parser.add_argument('--stage', type=str, required=True, default='train', help='status')
 parser.add_argument('--model_id', type=str, required=True, help='model id')
 parser.add_argument('--log_path', type=str, required=True, help='log')
 parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+parser.add_argument('--key', type=str, help='model id')
 
 parser.add_argument('--trainset_csv_path', type=str, required=True, help='')
 parser.add_argument('--validset_csv_path', type=str, required=True, help='')
@@ -35,7 +38,7 @@ parser.add_argument('--timestamp_feature', type=str, help='')
 parser.add_argument('--seq_len', type=int, default=96, help='input sequence length of encoder')
 parser.add_argument('--label_len', type=int, default=12, help='start token length of decoder')
 parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
-parser.add_argument('--interval', type=int, help='')
+parser.add_argument('--interval', type=int, default=900, help='')
 
 parser.add_argument('--model_name', type=str, required=True, default='transformer')
 parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
@@ -67,7 +70,7 @@ def main(params):
     print('Args in experiment:')
     print(args)
     # set experiments
-    factory_list = [TransformerForecasting]
+    factory_list = [TransformerForecasting, AluminaTransformerForecasting]
     forecasting_model = None
     for f in factory_list:
         if args.model_name in f.model_choices.keys():
@@ -83,22 +86,26 @@ def main(params):
         print('>>>>>>>end of training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
     elif args.stage == 'test':
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.model_id))
-        pred_rmse = forecasting_model.eval()
+        pred_rmse = forecasting_model.test(args.key)
         print('>>>>>>>end of testing : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
 
     torch.cuda.empty_cache()
 
 try:
-    # get parameters form tuner
-    tuner_params = nni.get_next_parameter()
-    trial_id = nni.get_trial_id()
-    logger.debug(tuner_params)
-    tuner_params['model_id'] = '%s_%s' % (base_args.model_id, trial_id)
-    tuner_params['hpo'] = 'nni'
-    print('model_id: %s' % tuner_params['model_id'])
-    params = vars(base_args)
-    params.update(tuner_params)
-    main(params)
+    if base_args.use_nni:
+        # get parameters form tuner
+        tuner_params = nni.get_next_parameter()
+        trial_id = nni.get_trial_id()
+        logger.debug(tuner_params)
+        tuner_params['model_id'] = '%s_%s' % (base_args.model_id, trial_id)
+        tuner_params['hpo'] = 'nni'
+        print('model_id: %s' % tuner_params['model_id'])
+        params = vars(base_args)
+        params.update(tuner_params)
+        main(params)
+    else:
+        params = vars(base_args)
+        main(params)
 except Exception as exception:
     logger.exception(exception)
     raise

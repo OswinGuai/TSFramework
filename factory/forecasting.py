@@ -6,6 +6,8 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, OneCycleLR
+import pandas as pd
+
 
 import os
 import time
@@ -67,13 +69,7 @@ class GeneralForecasting:
         return dataset, dataloader
 
     def _build_dataloader(self, args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True, key='none'):
-        if key != 'none':
-            with mutex:
-                if key not in self.cache_dataset.keys():
-                    self.cache_dataset[key] = self._create_data(args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True)
-                return self.cache_dataset[key]
-        else:
-            return self._create_data(args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True)
+        return self._create_data(args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True)
 
     def _build_optimizer(self, parameters, args):
         model_optim = self.optimizer_choices[args.optimizer](parameters, lr=args.lr)
@@ -108,10 +104,14 @@ class GeneralForecasting:
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
                 train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
-                self.backward(train_loss)
+                if train_loss != -999:
+                    self.backward(train_loss)
 
                 if (i + 1) % int(num_batch/5) == 0:
-                    print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
+                    if train_loss != -999:
+                        print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
+                    else:
+                        print("\titers: {0}, epoch: {1} | train_loss : -999".format(i + 1, epoch + 1))
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * num_batch - i)
                     print('\tspeed: {:.6f}s/iter; left time: {:.6f}s'.format(speed, left_time))
@@ -147,10 +147,14 @@ class GeneralForecasting:
         target_list = []
         with torch.no_grad():
             for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(valid_loader):
+
                 samples_batch = samples_batch.float().to(self.device)
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
-                outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                if self.args.timestamp_feature != 'none':
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                else:
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
                 outputs_list.append(outputs)
                 target_list.append(targets_batch[:,self.args.seq_len:,:])
         predict_outputs = torch.cat(outputs_list, dim=0)
@@ -158,12 +162,43 @@ class GeneralForecasting:
         eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
         return eval_result
 
+    def test(self, key):
+        self.load_checkpoints(key)
+        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
+        test_data, test_loader = self._build_dataloader(self.args, self.args.testset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='test')
+        self.to_eval()
+        outputs_list = []
+        target_list = []
+        with torch.no_grad():
+            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(test_loader):
+                samples_batch = samples_batch.float().to(self.device)
+                targets_batch = targets_batch.float().to(self.device)
+                datetimes_batch = datetimes_batch.float().to(self.device)
+                if self.args.timestamp_feature != 'none':
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                else:
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
+                outputs_list.append(outputs)
+                target_list.append(targets_batch[:,self.args.seq_len:,:])
+
+        target_scaler = test_data.target_scaler
+        #unscale = lambda x: x * target_scaler.var_ + target_scaler.mean_
+        predict_outputs = target_scaler.inverse_transform(torch.cat(outputs_list, dim=0).reshape([len(outputs_list), 1]).cpu())
+        target_outputs = target_scaler.inverse_transform(torch.cat(target_list, dim=0).reshape([len(outputs_list), 1]).cpu())
+        data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0])}
+        df = pd.DataFrame(data)
+        df.to_excel('log/%s_%s.xlsx' % (self.model_id, self.args.key))
+        test_result = self.test_metric(predict_outputs, target_outputs)
+        print("test result: %.3f. " % test_result.item())
+        return test_result
+
+
     def save_checkpoints(self, key):
-        target_path = os.path.join(self.base_path,'checkpoint-%d.pth' % key)
+        target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
         torch.save(self.model.state_dict(), target_path)
 
     def load_checkpoints(self, key):
-        target_path = os.path.join(self.base_path,'checkpoint-%d.pth' % key)
+        target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
         self.model.load_state_dict(torch.load(target_path))
 
     def backward(self, loss):
