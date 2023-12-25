@@ -1,0 +1,14 @@
+searchSpaceFile: search_space.json
+trialCommand: python main_nni.py --stage train --model_id alumina_transformer --model_name alumina_transformer --log_path log --trainset_csv_path /data1/peizhongyi/applications/alumina/alumina_trainset.csv --validset_csv_path /data1/peizhongyi/applications/alumina/alumina_validset.csv --testset_csv_path /data1/peizhongyi/applications/alumina/alumina_testset.csv --datetime_col dtime --feature_cols 57效循环母液进料温度,57效循环母液进料密度,冷凝器出汽压力,5效5闪蒸发母液去循环母液调配槽总流量,1效蒸发器汽温,1效蒸发器汽室压力,1效原液换热前温度,2效蒸发器汽温,2效蒸发器汽室压力,2效原液换热前温度,3效蒸发器汽温,3效蒸发器汽室压力,3效原液换热前温度,4效蒸发器汽温,4效蒸发器汽室压力,4效原液换热前温度,5效蒸发器汽温,5效蒸发器汽室压力,5效原液换热前温度,5效循环母液进料流量,6效蒸发器汽温,6效蒸发器汽室压力,6效原液换热前温度,原液闪蒸器循环母液进料流量,原液闪蒸器出料温度,原液闪蒸器蒸汽压力,7效原液换热前温度,7效蒸发器汽温,7效蒸发器汽室压力,1闪出料温度,2闪出料温度,3闪出料温度,4闪出料温度,5闪出料温度,5闪去循环母液调配槽密度,新蒸汽进料压力,新蒸汽进料流量,新蒸汽进料温度,循环上水温度,循环上水流量,循环下水温度,新蒸汽进汽阀门开度,5效循环母液进料阀开度,2闪出料阀开度,3效到2效泵开度,7效到6效泵开度,5闪循环母液出料泵开度 --target_cols 原液槽出口Nk离线化验 --seq_len 10 --label_len 2 --pred_len 1 --timestamp_feature none  --train_epochs 50 --gpu 0 --use_nni
+trialGpuNumber: 1
+trialConcurrency: 8
+maxTrialNumber: 400
+maxExperimentDuration: 2h
+tuner:
+  name: TPE
+  classArgs:
+    optimize_mode: minimize
+trainingService:
+  platform: local
+  useActiveGpu: True
+
