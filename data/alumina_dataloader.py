@@ -28,7 +28,7 @@ class AluminaDataset(Dataset):
 
     def __read_data__(self):
 
-        data = pd.read_csv(self.csv_path)
+        data = pd.read_csv(self.csv_path,encoding="GB2312")
         data = data.reset_index(drop=True)
 
         data_features = data[self.feature_cols]
