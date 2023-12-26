@@ -16,12 +16,10 @@ class AluminaDataset(Dataset):
         # init
         self.csv_path = csv_path
         self.segment_len = segment_len
+        self.seq_len = segment_len-30
+        self.pred_len = 30
         self.feature_cols = feature_cols.split(',')
         self.pattern = pattern
-        # if self.pattern=='pretrain':
-        #     self.target_cols = self.feature_cols.split(',')
-        # else:
-        #     self.target_cols = target_cols.split(',')
         self.target_cols = target_cols.split(',')
         self.datetime_col = datetime_col
         self.interval = interval
@@ -51,13 +49,14 @@ class AluminaDataset(Dataset):
         # get temporally length-fixed samples from data_features
         data_len = len(data_features)
         if self.pattern == 'pretrain':
-            start_indices = [i for i in range(int(data_len)-60)]
+            start_indices = [i for i in range(int(data_len)-self.segment_len + 1)] # 6,2  0,1 1,2 2,3 3,4 4,5
             self.start_indices = start_indices
 
         elif self.pattern == 'train':
             # start_indices = [i * 30 + np.array(list(range(30 - self.segment_len + 1))) for i in range(int(data_len/30))]
             # start_indices = [i * 120 + 60 for i in range(int(data_len/120))]
-            start_indices = [i * 120 + np.array(list(range(120 - self.segment_len + 1))) for i in range(int(data_len/120))]
+            # start_indices = [i * 120 + np.array(list(range(120 - self.segment_len + 1))) for i in range(int(data_len/120))]
+            start_indices = [i * 120 + 90 + np.array(list(range(self.pred_len ))) for i in range(int(data_len/120)-1)]
             self.start_indices = np.concatenate(start_indices)
             # self.start_indices = start_indices
         else:
@@ -66,20 +65,17 @@ class AluminaDataset(Dataset):
 
     def __getitem__(self, index):
         posi = int(self.start_indices[index])
-        samples = self.data_features[posi:posi + self.segment_len]
         targets=[]
-        if self.pattern == 'pretrain':
-            targets = self.data_features[posi+self.segment_len:posi+self.segment_len*2]
-            return samples, np.array(targets, dtype=float), 0
-        
+        samples = self.data_features[posi : posi + self.seq_len]
+        targets = self.data_target[posi + self.seq_len : posi + self.seq_len + self.pred_len]
         # if self.pattern == 'train':
-        else:
-            targets = self.data_target[posi: posi + self.segment_len]
+        if self.pattern != 'pretrain':
             for i in range(len(targets)):
                 if posi + i not in self.valid_label:
                     targets[i] = -999
             # standardize targets
-            return samples, np.array(targets, dtype=float), 0
+        # print("Targets:\n",targets.shape)
+        return samples, np.array(targets, dtype=float), 0
         
 
     def __len__(self):

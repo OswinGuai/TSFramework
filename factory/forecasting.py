@@ -142,7 +142,7 @@ class GeneralForecasting:
         return best_valid_loss.item()
     
     def fit(self,key):
-        self.load_checkpoints(key)
+        # self.load_checkpoints(key)
         time_now = time.time()
         training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
         total_iter = 0
@@ -213,7 +213,7 @@ class GeneralForecasting:
                 else:
                     outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
                 outputs_list.append(outputs)
-                target_list.append(targets_batch[:,self.args.seq_len:,:])
+                target_list.append(targets_batch[:,-self.args.pred_len:,:])
         predict_outputs = torch.cat(outputs_list, dim=0)
         target_outputs = torch.cat(target_list, dim=0)
         eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)

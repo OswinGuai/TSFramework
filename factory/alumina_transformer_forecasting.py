@@ -19,8 +19,10 @@ class AluminaTransformerForecasting(GeneralForecasting):
         model_params = {
             'enc_in': len(args.feature_cols.split(',')),
             'dec_in': len(args.feature_cols.split(',')),
-            'c_out': len(args.feature_cols.split(',')) + len(args.target_cols.split(',')),
+            'c_out': len(args.target_cols.split(',')),
             }
+ 
+
         super().__init__(args, model_params)
         self.criterion = nn.MSELoss()
 
@@ -31,7 +33,6 @@ class AluminaTransformerForecasting(GeneralForecasting):
         dataset = AluminaDataset(
                 csv_path=csv_path,
                 segment_len=(args.pred_len + args.seq_len),
-                # segment_len=30,
                 feature_cols=args.feature_cols,
                 target_cols=args.target_cols,
                 datetime_col=args.datetime_col,
@@ -91,12 +92,29 @@ class AluminaTransformerForecasting(GeneralForecasting):
     def batch_loss(self, samples_batch, targets_batch, datetimes_batch, curr_iter):
         samples_enc = samples_batch[:,:self.args.seq_len,:]
         #datetimes_enc = torch.zeros([samples_batch.shape[0], self.args.seq_len, 1]).float().to(self.device)
-        samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]), 1)
+        # samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]), 1)
+        B, S, V = samples_enc.shape
+        samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
         #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([samples_batch.shape[0], self.args.pred_len, 1]).to(self.device).float()), 1)
         outputs = self._forward(samples_enc, None,  samples_dec, None)
-        reg_outputs = outputs[:,:,:-1]
-        label_outputs = outputs[:,:,-1:]
-        reg_targets = samples_batch[:,:,-1:]
+       
+        if self.args.stage=='pretrain':
+            reg_outputs = outputs[:,:,:]
+            label_outputs = outputs[:,:,]
+            reg_targets = targets_batch[:,:,:]
+        else:
+            reg_outputs = outputs[:,:,:]
+            label_outputs = outputs[:,:,:]
+            reg_targets = samples_batch[:,:,:]
+        # label_outputs = outputs[:,:,-self.args.pred_len:]
+        # reg_targets = samples_batch[:,:,-self.args.pred_len:]
+
+        # print("Output Shape:",outputs.shape)
+        # print("reg_outputs Shape:",reg_outputs.shape)
+        # print("reg_targets Shape:",reg_targets.shape)
+        # print("samples_batch Shape:",samples_batch.shape)
+
+
         label_targets = targets_batch[:, -self.args.pred_len:, :]
         reg_loss = self.criterion(reg_outputs, reg_targets)
         # print("Label Targets Shape:\n",label_targets.shape)

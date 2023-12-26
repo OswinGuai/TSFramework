@@ -1,0 +1,45 @@
+model_id: alumina_transformer_STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train', model_id='alumina_transformer_STANDALONE', log_path='log', checkpoints='./checkpoints/', key=None, trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset.csv', datetime_col='dtime', feature_cols='5效5闪到调配槽后循环母液Nk,5效5闪到调配槽后循环母液ak/Rp,6效出料密度,5闪出料密度,57效循环母液进料温度,57效循环母液进料密度,冷凝器出汽压力,5效5闪蒸发母液去循环母液调配槽总流量,1效蒸发器汽温,1效蒸发器汽室压力,1效原液换热前温度,1效出料温度,2效蒸发器汽温,2效蒸发器汽室压力,2效原液换热前温度,3效蒸发器汽温,3效蒸发器汽室压力,3效原液换热前温度,4效蒸发器汽温,4效蒸发器汽室压力,4效原液换热前温度,5效蒸发器汽温,5效蒸发器汽室压力,5效原液换热前温度,5效循环母液进料流量,6效蒸发器汽温,6效蒸发器汽室压力,6效原液换热前温度,原液闪蒸器循环母液进料流量,原液闪蒸器出料温度,原液闪蒸器蒸汽压力,7效原液换热前温度,7效蒸发器汽温,7效蒸发器汽室压力,1闪出料温度,2闪出料温度,3闪出料温度,4闪出料温度,5闪出料温度,5闪去循环母液调配槽密度,5闪去循环母液调配槽流量,新蒸汽进料压力,新蒸汽进料流量,新蒸汽进料温度,循环上水温度,循环上水流量,循环下水温度,原液闪蒸器循环母液进料阀开度,1效出料阀门开度,1闪出料阀开度,3闪出料阀开度,4闪出料阀开度,2效到1效泵开度,4效到3效泵开度,5效到4效泵开度,6效出料出料泵开度', target_cols='target', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_transformer', d_model=512, n_heads=8, e_layers=1, d_layers=1, d_ff=2048, hidden_dim=256, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, use_gpu=True, hpo='nni')
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_transformer_STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+	iters: 95, epoch: 1 | train_loss : 3.7249
+	speed: 0.748762s/iter; left time: 17787.589362s
+	iters: 190, epoch: 1 | train_loss : 3.3199
+	speed: 0.703608s/iter; left time: 16648.068969s
+	iters: 285, epoch: 1 | train_loss : 3.7134
+	speed: 0.698610s/iter; left time: 16463.444907s
+	iters: 380, epoch: 1 | train_loss : 3.3037
+	speed: 0.704537s/iter; left time: 16536.186811s
+	iters: 475, epoch: 1 | train_loss : 2.8362
+	speed: 0.701832s/iter; left time: 16406.022857s
+testset is mistaken
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 108, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 88, in main
+    forecasting_model.fit(args.key)
+  File "/workspace/qiuyunzhong/TSFramework/factory/forecasting.py", line 178, in fit
+    valid_loss = self.eval(epoch)
+  File "/workspace/qiuyunzhong/TSFramework/factory/forecasting.py", line 219, in eval
+    eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_transformer_forecasting.py", line 72, in eval_metric
+    raise Exception('testset is mistaken')
+Exception: testset is mistaken
+Truth Value Shape:
+ torch.Size([146, 30, 1])
+Eval Output Shape:
+ torch.Size([146, 30, 1])
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 108, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 88, in main
+    forecasting_model.fit(args.key)
+  File "/workspace/qiuyunzhong/TSFramework/factory/forecasting.py", line 178, in fit
+    valid_loss = self.eval(epoch)
+  File "/workspace/qiuyunzhong/TSFramework/factory/forecasting.py", line 219, in eval
+    eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_transformer_forecasting.py", line 72, in eval_metric
+    raise Exception('testset is mistaken')
+Exception: testset is mistaken
