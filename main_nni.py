@@ -80,9 +80,12 @@ def main(params):
     if forecasting_model is None:
         assert(False)
 
+    if args.stage == 'pretrain':
+        print('>>>>>>>start pretraining : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+        forecasting_model.prefit()
     if args.stage == 'train':
         print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
-        forecasting_model.fit()
+        forecasting_model.fit(args.key)
         print('>>>>>>>end of training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
     elif args.stage == 'test':
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.model_id))

@@ -85,7 +85,64 @@ class GeneralForecasting:
     def predict(self, samples_batch, datetimes_batch):
         raise NotImplemented
 
-    def fit(self):
+    def prefit(self):
+        time_now = time.time()
+        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='pretrain')
+        total_iter = 0
+        valid_loss = None
+        best_valid_loss = None
+        num_worse = 0
+        for epoch in range(self.args.train_epochs):
+            iter_count = 0
+            epoch_time = time.time()
+            self.to_train()
+            num_batch = int(len(training_data) / self.args.batch_size)
+            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(training_loader):
+                iter_count += 1
+                total_iter += 1
+                samples_batch = samples_batch.float().to(self.device)
+                targets_batch = targets_batch.float().to(self.device)
+                datetimes_batch = datetimes_batch.float().to(self.device)
+                train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+                if train_loss != -999:
+                    self.backward(train_loss)
+
+                if (i + 1) % int(num_batch/5) == 0:
+                    if train_loss != -999:
+                        print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
+                    else:
+                        print("\titers: {0}, epoch: {1} | train_loss : -999".format(i + 1, epoch + 1))
+                    speed = (time.time() - time_now) / iter_count
+                    left_time = speed * ((self.args.train_epochs - epoch) * num_batch - i)
+                    print('\tspeed: {:.6f}s/iter; left time: {:.6f}s'.format(speed, left_time))
+                    iter_count = 0
+                    time_now = time.time()
+
+            valid_loss = self.eval(epoch)
+            if 'hpo' in self.args and self.args.hpo == 'optuna':
+                # optuna
+                self.trial.report(valid_loss.item(), epoch)
+            elif 'hpo' in self.args and self.args.hpo == 'nni':
+                # nni
+                nni.report_intermediate_result(valid_loss.item())
+            print("Epoch: {} | cost time: {} | valid_loss: {}".format(epoch + 1, time.time() - epoch_time, valid_loss))
+            if best_valid_loss is None or valid_loss < best_valid_loss:
+                best_valid_loss = valid_loss
+                print("Checkpoint Saved\n")
+                self.save_checkpoints(epoch)
+                num_worse = 0
+            else:
+                num_worse += 1
+            if num_worse > self.args.patience:
+                print("Early stop with best valid_loss: {}".format(valid_loss))
+                break
+            self.stepper.step()
+        if 'hpo' in self.args and self.args.hpo == 'nni':
+            nni.report_final_result(best_valid_loss.item())
+        return best_valid_loss.item()
+    
+    def fit(self,key):
+        self.load_checkpoints(key)
         time_now = time.time()
         training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
         total_iter = 0
@@ -196,6 +253,7 @@ class GeneralForecasting:
     def save_checkpoints(self, key):
         target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
         torch.save(self.model.state_dict(), target_path)
+        print("Chepoint Saved at: ",target_path)
 
     def load_checkpoints(self, key):
         target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
