@@ -118,6 +118,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
         label_targets = targets_batch[:, -self.args.pred_len:, :]
         reg_loss = self.criterion(reg_outputs, reg_targets)
         # print("Label Targets Shape:\n",label_targets.shape)
+    
         mask = torch.where(
             label_targets.reshape([label_targets.shape[0]*label_targets.shape[1]*label_targets.shape[2]]) == -999, 
             torch.zeros(label_targets.shape[0]*label_targets.shape[1]*label_targets.shape[2]).to(self.device), 

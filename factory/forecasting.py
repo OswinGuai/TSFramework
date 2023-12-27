@@ -8,7 +8,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, OneCycleLR
 import pandas as pd
 
-
+import numpy as np
 import os
 import time
 import warnings
@@ -142,7 +142,7 @@ class GeneralForecasting:
         return best_valid_loss.item()
     
     def fit(self,key):
-        # self.load_checkpoints(key)
+        self.load_checkpoints(key)
         time_now = time.time()
         training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
         total_iter = 0
@@ -207,6 +207,7 @@ class GeneralForecasting:
 
                 samples_batch = samples_batch.float().to(self.device)
                 targets_batch = targets_batch.float().to(self.device)
+                # targets_batch = targets_batch.float()
                 datetimes_batch = datetimes_batch.float().to(self.device)
                 if self.args.timestamp_feature != 'none':
                     outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
@@ -215,7 +216,10 @@ class GeneralForecasting:
                 outputs_list.append(outputs)
                 target_list.append(targets_batch[:,-self.args.pred_len:,:])
         predict_outputs = torch.cat(outputs_list, dim=0)
+        print("predict_outputs shape:",predict_outputs.shape)
+        # print("target_list shape",np.array(target_list[144]).shape)
         target_outputs = torch.cat(target_list, dim=0)
+        print("target_outputs shape:",target_outputs.shape)
         eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
         return eval_result
 
@@ -258,6 +262,7 @@ class GeneralForecasting:
     def load_checkpoints(self, key):
         target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
         self.model.load_state_dict(torch.load(target_path))
+        print('checkpoint loaded at:',target_path)
 
     def backward(self, loss):
         self.optimizer.zero_grad()

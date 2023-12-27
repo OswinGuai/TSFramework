@@ -3,6 +3,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 import warnings
 from sklearn.preprocessing import StandardScaler
+import torch
 
 warnings.filterwarnings('ignore')
 
@@ -37,7 +38,7 @@ class AluminaDataset(Dataset):
         data_features = data[self.feature_cols]
         data_target = data[self.target_cols]
         # self.valid_label = np.arange(1, data.shape[0]/30 + 1) * 30 - 1
-        self.valid_label = np.arange(1, data.shape[0]/120 + 1) * 120 - 1
+        self.valid_label = np.arange(1, int(data.shape[0]/120) + 1) * 120 - 1
 
 
         if self.init_scaler:
@@ -53,12 +54,11 @@ class AluminaDataset(Dataset):
             self.start_indices = start_indices
 
         elif self.pattern == 'train':
-            # start_indices = [i * 30 + np.array(list(range(30 - self.segment_len + 1))) for i in range(int(data_len/30))]
-            # start_indices = [i * 120 + 60 for i in range(int(data_len/120))]
-            # start_indices = [i * 120 + np.array(list(range(120 - self.segment_len + 1))) for i in range(int(data_len/120))]
-            start_indices = [i * 120 + 90 + np.array(list(range(self.pred_len ))) for i in range(int(data_len/120)-1)]
+            # start_indices = [range(i - 60 + 1, i - 30 + 1) for i in self.valid_label]
+            start_indices = [range(i - self.segment_len + 1, i - self.pred_len + 1) for i in self.valid_label]
+            start_indices = start_indices[:-29]
+
             self.start_indices = np.concatenate(start_indices)
-            # self.start_indices = start_indices
         else:
             self.start_indices = self.valid_label - self.segment_len + 1
 
@@ -67,11 +67,15 @@ class AluminaDataset(Dataset):
         posi = int(self.start_indices[index])
         targets=[]
         samples = self.data_features[posi : posi + self.seq_len]
+        # print('Samples shape:', samples.shape)
+        # samples = np.concatenate((samples,torch.ones(samples.shape[0],1)*-999),axis=1)
         targets = self.data_target[posi + self.seq_len : posi + self.seq_len + self.pred_len]
-        # if self.pattern == 'train':
-        if self.pattern != 'pretrain':
+        if self.pattern == 'pretrain':
+            targets[:,-1:]=-999
+        else:
+            targets[:,:-1]=-999
             for i in range(len(targets)):
-                if posi + i not in self.valid_label:
+                if posi + self.seq_len + i not in self.valid_label:
                     targets[i] = -999
             # standardize targets
         # print("Targets:\n",targets.shape)
