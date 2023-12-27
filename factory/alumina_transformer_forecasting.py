@@ -105,7 +105,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
         else:
             reg_outputs = outputs[:,:,:]
             label_outputs = outputs[:,:,:]
-            reg_targets = samples_batch[:,:,:]
+            reg_targets = targets_batch[:,:,:]
         # label_outputs = outputs[:,:,-self.args.pred_len:]
         # reg_targets = samples_batch[:,:,-self.args.pred_len:]
 
@@ -113,7 +113,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
         # print("reg_outputs Shape:",reg_outputs.shape)
         # print("reg_targets Shape:",reg_targets.shape)
         # print("samples_batch Shape:",samples_batch.shape)
-
+        # print("targets_batch Shape:",targets_batch.shape)
 
         label_targets = targets_batch[:, -self.args.pred_len:, :]
         reg_loss = self.criterion(reg_outputs, reg_targets)

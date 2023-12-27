@@ -255,12 +255,15 @@ class GeneralForecasting:
 
 
     def save_checkpoints(self, key):
-        target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
+        if self.args.stage=='pretrain':
+            target_path = os.path.join(self.base_path,'pretrain_checkpoint-%s.pth' % str(key))
+        elif self.args.stage=='train':
+            target_path = os.path.join(self.base_path,'finetune_checkpoint-%s.pth' % str(key))
         torch.save(self.model.state_dict(), target_path)
         print("Chepoint Saved at: ",target_path)
 
     def load_checkpoints(self, key):
-        target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
+        target_path = os.path.join(self.base_path,'pretrain_checkpoint-%s.pth' % str(key))
         self.model.load_state_dict(torch.load(target_path))
         print('checkpoint loaded at:',target_path)
 
