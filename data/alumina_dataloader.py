@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 import warnings
 from sklearn.preprocessing import StandardScaler
 import torch
+import pdb
 
 warnings.filterwarnings('ignore')
 
@@ -67,19 +68,15 @@ class AluminaDataset(Dataset):
         posi = int(self.start_indices[index])
         targets=[]
         samples = self.data_features[posi : posi + self.seq_len]
-        
         # samples = np.concatenate((samples,np.ones((samples.shape[0],1))*-999),axis=1)
-        # print('Samples shape:', samples.shape)
         targets = self.data_target[posi + self.seq_len : posi + self.seq_len + self.pred_len]
-        if self.pattern == 'pretrain':
-            targets[:,-1]=-999
-        else:
-            targets[:,:-1]=-999
+        if self.pattern == 'train':
             for i in range(len(targets)):
                 if posi + self.seq_len + i not in self.valid_label:
                     targets[i,-1] = -999
+
             # standardize targets
-        # print("Targets:\n",targets.shape)
+
         return samples, np.array(targets, dtype=float), 0
         
 

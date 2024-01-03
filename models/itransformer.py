@@ -14,15 +14,17 @@ import pdb
 class iTransformer(nn.Module):
     def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, pred_len, d_model=512, n_heads=8,
                  e_layers=3, d_layers=2, d_ff=512, dropout=0.5, activation='gelu', output_attention=False,
-                 device=0, timestamp_feature=True, **kwargs):
+                 device=0, timestamp_feature=True, stage='train',**kwargs):
         super(iTransformer, self).__init__()
         self.seq_len = seq_len
         self.label_len = label_len
         self.pred_len = pred_len
         self.device = device
         self.output_attention = output_attention
+        self.enc_in = enc_in
         self.c_out = c_out
         self.timestamp_feature = timestamp_feature
+        self.stage = stage
 
         # Encoding
         self.enc_embedding = DataEmbedding_inverted(seq_len, d_model, 'timeF', 'h', dropout)
@@ -44,6 +46,8 @@ class iTransformer(nn.Module):
         )
         self.projector = nn.Linear(d_model, self.pred_len, bias=True)
 
+        self.target_projector = nn.Linear(self.enc_in, self.c_out, bias=True)
+
         self.global_step = 0
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
@@ -60,6 +64,8 @@ class iTransformer(nn.Module):
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
         dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N] # filter the covariates 
 
+        if self.stage=='train':
+            dec_out = self.target_projector(dec_out)
         dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         return dec_out[:,:,:self.c_out]

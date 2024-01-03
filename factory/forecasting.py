@@ -216,10 +216,8 @@ class GeneralForecasting:
                 outputs_list.append(outputs)
                 target_list.append(targets_batch[:,-self.args.pred_len:,:])
         predict_outputs = torch.cat(outputs_list, dim=0)
-        print("predict_outputs shape:",predict_outputs.shape)
-        # print("target_list shape",np.array(target_list[144]).shape)
         target_outputs = torch.cat(target_list, dim=0)
-        print("target_outputs shape:",target_outputs.shape)
+
         eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
         return eval_result
 
@@ -240,15 +238,35 @@ class GeneralForecasting:
                 else:
                     outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
                 outputs_list.append(outputs)
-                target_list.append(targets_batch[:,self.args.seq_len:,:])
+                target_list.append(targets_batch[:,-self.args.seq_len:,:])
 
         target_scaler = test_data.target_scaler
         #unscale = lambda x: x * target_scaler.var_ + target_scaler.mean_
-        predict_outputs = target_scaler.inverse_transform(torch.cat(outputs_list, dim=0).reshape([len(outputs_list), 1]).cpu())
-        target_outputs = target_scaler.inverse_transform(torch.cat(target_list, dim=0).reshape([len(outputs_list), 1]).cpu())
-        data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0])}
+        
+        predict_outputs = torch.cat(outputs_list, dim=0)
+        predict_outputs = predict_outputs[:,-1:,:]
+        # * from scratch
+        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
+        # * finetune
+        # predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 57]).cpu())
+        predict_outputs = predict_outputs[:,-1:]
+
+        target_outputs = torch.cat(target_list, dim=0)
+        target_outputs = target_outputs[:,-1:,:]
+        # * from_scratch
+        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
+        # * finetune
+        # target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 57]).cpu())
+        target_outputs = target_outputs[:,-1:]
+        
+        # predict_outputs = torch.cat(outputs_list, dim=0)
+        # target_outputs = torch.cat(target_list, dim=0)
+
+        data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1])}
+        print("data:",data)
+        # data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2])}
         df = pd.DataFrame(data)
-        df.to_excel('log/%s_%s.xlsx' % (self.model_id, self.args.key))
+        df.to_excel('%s/%s_%s.xlsx' % (self.args.checkpoints,self.model_id, self.args.key))
         test_result = self.test_metric(predict_outputs, target_outputs)
         print("test result: %.3f. " % test_result.item())
         return test_result
@@ -256,16 +274,18 @@ class GeneralForecasting:
 
     def save_checkpoints(self, key):
         if self.args.stage=='pretrain':
-            target_path = os.path.join(self.base_path,'pretrain_checkpoint-%s.pth' % str(key))
+            target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
         elif self.args.stage=='train':
-            target_path = os.path.join(self.base_path,'finetune_checkpoint-%s.pth' % str(key))
+            target_path = os.path.join(self.base_path,'checkpoint-%s.pth' % str(key))
         torch.save(self.model.state_dict(), target_path)
         print("Chepoint Saved at: ",target_path)
 
     def load_checkpoints(self, key):
-        target_path = os.path.join(self.base_path,'pretrain_checkpoint-%s.pth' % str(key))
-        self.model.load_state_dict(torch.load(target_path))
+        # target_path = os.path.join(self.base_path,'pretrain_checkpoint-%s.pth' % str(key))
+        target_path = os.path.join(os.path.dirname(self.base_path),'checkpoint-%s.pth' % str(key))
         print('checkpoint loaded at:',target_path)
+        self.model.load_state_dict(torch.load(target_path))
+        
 
     def backward(self, loss):
         self.optimizer.zero_grad()
