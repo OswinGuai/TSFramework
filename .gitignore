@@ -5,3 +5,5 @@ datasets/
 */__pycache__
 .vscode/
 */*/__pycache__/
+ckeckpoints_itransformer/
+checkpoints_transformer/

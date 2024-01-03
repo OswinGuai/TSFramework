@@ -51,22 +51,34 @@ class AluminaTransformerForecasting(GeneralForecasting):
         return dataset, dataloader
 
     def test_metric(self, eval_outputs, truth_values):
+        if self.args.stage=='pretrain':
+            eval_outputs = eval_outputs[:,:-1]
+            truth_values = truth_values[:,:-1]
+        else:
+            eval_outputs = eval_outputs[:,-1:]
+            truth_values = truth_values[:,-1:]
         rmse = ((eval_outputs - truth_values) ** 2).mean() ** 0.5
         return rmse
 
     def eval_metric(self, eval_outputs, truth_values, epoch):
         eval_outputs = eval_outputs.cpu()
         truth_values = truth_values.cpu()
+        if self.args.stage=='pretrain':
+            eval_outputs = eval_outputs[:,:,:-1]
+            truth_values = truth_values[:,:,:-1]
+        else:
+            eval_outputs = eval_outputs[:,:,-1:]
+            truth_values = truth_values[:,:,-1:]
         
-        print("Truth Value Shape:\n",truth_values.shape)
-        print("Eval Output Shape:\n",eval_outputs.shape)
+        # print("Truth Value Shape:\n",truth_values)
+        # print("Eval Output Shape:\n",eval_outputs.shape)
         # if self.pattern == 'pretrain':
         #     mask = torch.ones(truth_values.shape[0])
         # if self.pattern == 'train':
         mask = torch.where(truth_values.reshape(
-            [truth_values.shape[0]*truth_values.shape[1]*truth_values.shape[2]]) == -999, 
-            torch.zeros(truth_values.shape[0]*truth_values.shape[1]*truth_values.shape[2]), 
-            torch.ones(truth_values.shape[0]*truth_values.shape[1]*truth_values.shape[2])
+            [truth_values.shape[0]*truth_values.shape[1],truth_values.shape[2]]) == -999, 
+            torch.zeros(truth_values.shape[0]*truth_values.shape[1],truth_values.shape[2]), 
+            torch.ones(truth_values.shape[0]*truth_values.shape[1],truth_values.shape[2])
         )
         if torch.sum(mask) == 0:
             raise Exception('testset is mistaken')
@@ -86,7 +98,8 @@ class AluminaTransformerForecasting(GeneralForecasting):
         #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, datetimes_enc.shape[2]]).float().to(self.device)), 1)
         #outputs = self._forward(samples_enc, datetimes_enc,  samples_dec, datetimes_dec)
         outputs = self._forward(samples_enc, None,  samples_dec, None)
-        label_outputs = outputs[:,:,-1:]
+        # print("predict output shape:",outputs.shape)
+        label_outputs = outputs[:,:,:]
         return label_outputs
 
     def batch_loss(self, samples_batch, targets_batch, datetimes_batch, curr_iter):
@@ -99,41 +112,38 @@ class AluminaTransformerForecasting(GeneralForecasting):
         outputs = self._forward(samples_enc, None,  samples_dec, None)
        
         if self.args.stage=='pretrain':
-            reg_outputs = outputs[:,:,:]
-            label_outputs = outputs[:,:,]
-            reg_targets = targets_batch[:,:,:]
+            reg_outputs = outputs[:,:,:-1]
+            # label_outputs = outputs[:,:,:-1]
+            reg_targets = targets_batch[:,:,:-1]
+            # import pdb
+            # pdb.set_trace()
+            reg_loss = self.criterion(reg_outputs, reg_targets)
+            self.writer.add_scalar('loss/reg_loss', reg_loss.item(), curr_iter)
+            train_loss = reg_loss
+            # label_targets = targets_batch[:, -self.args.pred_len:, :-1]
         else:
-            reg_outputs = outputs[:,:,:]
-            label_outputs = outputs[:,:,:]
-            reg_targets = targets_batch[:,:,:]
+            # reg_outputs = outputs[:,:,-1:]
+            label_outputs = outputs[:,:,-1:]
+            # reg_targets = targets_batch[:,:,-1:]
+            label_targets = targets_batch[:, -self.args.pred_len:, -1:]
+
+            mask = torch.where(
+                label_targets.reshape([label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]]) == -999, 
+                torch.zeros(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device), 
+                torch.ones(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device)
+            )
+            if torch.sum(mask) == 0:
+                self.writer.add_scalar('loss/label_loss', 0, curr_iter)
+                return -999
+            else:
+                label_loss = (torch.sum(mask * ((label_targets - label_outputs) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
+                #train_loss = 5 * label_loss + reg_loss
+                train_loss = label_loss 
+                self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
         # label_outputs = outputs[:,:,-self.args.pred_len:]
         # reg_targets = samples_batch[:,:,-self.args.pred_len:]
-
-        # print("Output Shape:",outputs.shape)
-        # print("reg_outputs Shape:",reg_outputs.shape)
-        # print("reg_targets Shape:",reg_targets.shape)
-        # print("samples_batch Shape:",samples_batch.shape)
-        # print("targets_batch Shape:",targets_batch.shape)
-
-        label_targets = targets_batch[:, -self.args.pred_len:, :]
-        reg_loss = self.criterion(reg_outputs, reg_targets)
-        # print("Label Targets Shape:\n",label_targets.shape)
-    
-        mask = torch.where(
-            label_targets.reshape([label_targets.shape[0]*label_targets.shape[1]*label_targets.shape[2]]) == -999, 
-            torch.zeros(label_targets.shape[0]*label_targets.shape[1]*label_targets.shape[2]).to(self.device), 
-            torch.ones(label_targets.shape[0]*label_targets.shape[1]*label_targets.shape[2]).to(self.device)
-        )
-        if torch.sum(mask) == 0:
-            train_loss = reg_loss
-            self.writer.add_scalar('loss/label_loss', 0, curr_iter)
-            return -999
-        else:
-            label_loss = (torch.sum(mask * ((label_targets - label_outputs) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
-            #train_loss = 5 * label_loss + reg_loss
-            train_loss = 5 * label_loss + 0 * reg_loss
-            self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
-        self.writer.add_scalar('loss/reg_loss', reg_loss.item(), curr_iter)
+        # label_targets = targets_batch[:, -self.args.pred_len:, :]
+            
         self.writer.add_scalar('loss/train_loss', train_loss.item(), curr_iter)
         return train_loss
 
