@@ -46,7 +46,8 @@ class iTransformer(nn.Module):
         )
         self.projector = nn.Linear(d_model, self.pred_len, bias=True)
 
-        self.target_projector = nn.Linear(self.enc_in, self.c_out, bias=True)
+        # self.target_projector = nn.Linear(self.enc_in, self.c_out, bias=True)
+        self.target_projector = nn.Linear(self.enc_in, 1, bias=True)
 
         self.global_step = 0
 

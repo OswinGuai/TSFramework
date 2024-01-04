@@ -1,0 +1,14 @@
+searchSpaceFile: finetune_space.json
+trialCommand: 
+trialGpuNumber: 1
+trialConcurrency: 4
+maxTrialNumber: 400
+maxExperimentDuration: 2h
+tuner:
+  name: TPE
+  classArgs:
+    optimize_mode: minimize
+trainingService:
+  platform: local
+  useActiveGpu: True
+

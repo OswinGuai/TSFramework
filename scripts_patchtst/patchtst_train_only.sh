@@ -1,7 +1,7 @@
 python main_nni.py \
---stage test \
---model_id alumina_itransformer \
---model_name alumina_itransformer \
+--stage train_only \
+--model_id alumina_patchtst \
+--model_name alumina_patchtst \
 --log_path log \
 --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv \
 --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv \
@@ -16,10 +16,5 @@ python main_nni.py \
 --train_epochs 50 \
 --gpu 0 \
 --use_nni \
---checkpoints ./checkpoints/alumina_itransformer \
---model_id oAeQB \
---key 6 \
---hidden_dim 128 \
---d_model 128 \
---e_layers 1 \
---d_layers 1 
+
+

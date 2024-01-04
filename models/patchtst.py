@@ -28,14 +28,16 @@ class FlattenHead(nn.Module):
 class PatchTST(nn.Module):
     def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, pred_len, factor, stride=8, patch_len=16, d_model=512, n_heads=8,
                  e_layers=3, d_layers=2, d_ff=512, dropout=0.5, activation='gelu', output_attention=False,
-                 device=0, **kwargs):
+                 device=0, stage='train',**kwargs):
         super(PatchTST, self).__init__()
         self.seq_len = seq_len
         self.label_len = label_len
         self.pred_len = pred_len
         self.device = device
         self.output_attention = output_attention
+        self.enc_in = enc_in
         self.c_out = c_out
+        self.stage = stage
 
 
         # Encoder
@@ -61,6 +63,9 @@ class PatchTST(nn.Module):
         self.head_nf = d_model * int((seq_len - patch_len) / stride + 2)
         self.head = FlattenHead(enc_in, self.head_nf, pred_len, head_dropout=dropout)
 
+        # self.target_projector = nn.Linear(self.enc_in, self.c_out, bias=True)
+        self.target_projector = nn.Linear(self.enc_in, 1, bias=True)
+
         self.global_step = 0
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
@@ -83,6 +88,9 @@ class PatchTST(nn.Module):
         # Decoder
         dec_out = self.head(enc_out)  # z: [bs x nvars x target_window]
         dec_out = dec_out.permute(0, 2, 1)
+
+        if self.stage=='train':
+            dec_out = self.target_projector(dec_out)
 
         dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))

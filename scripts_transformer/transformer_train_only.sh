@@ -22,7 +22,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 cmd='''python main_nni.py 
---stage train 
+--stage train_only 
 --model_id alumina_transformer 
 --model_name alumina_transformer 
 --log_path log 

@@ -104,7 +104,7 @@ try:
         # get parameters form tuner
         tuner_params = nni.get_next_parameter()
         trial_id = nni.get_trial_id()
-        logger.debug(tuner_params)
+        logger.info(tuner_params)
         tuner_params['model_id'] = '%s/%s' % (base_args.model_id, trial_id)
         tuner_params['hpo'] = 'nni'
         print('model_id: %s' % tuner_params['model_id'])
