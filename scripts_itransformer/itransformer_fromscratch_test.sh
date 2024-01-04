@@ -17,8 +17,8 @@ python main_nni.py \
 --gpu 0 \
 --use_nni \
 --checkpoints ./checkpoints/alumina_itransformer \
---model_id oAeQB \
---key 6 \
+--model_id yHEvz \
+--key 5 \
 --hidden_dim 128 \
 --d_model 128 \
 --e_layers 1 \

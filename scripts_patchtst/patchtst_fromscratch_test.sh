@@ -16,7 +16,7 @@ python main_nni.py \
 --gpu 0 \
 --use_nni \
 --checkpoints ./checkpoints/alumina_patchtst \
---model_id JNopK \
+--model_id lQjfO \
 --key 0 \
 --hidden_dim 128 \
 --d_model 128 \
