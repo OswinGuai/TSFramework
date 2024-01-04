@@ -52,11 +52,19 @@ class AluminaTransformerForecasting(GeneralForecasting):
 
     def test_metric(self, eval_outputs, truth_values):
         if self.args.stage=='pretrain':
-            eval_outputs = eval_outputs[:,:-1]
-            truth_values = truth_values[:,:-1]
+            if 'itransformer' in self.args.stage:
+                eval_outputs = eval_outputs
+                truth_values = truth_values
+            else:    
+                eval_outputs = eval_outputs[:,:-1]
+                truth_values = truth_values[:,:-1]
         else:
-            eval_outputs = eval_outputs[:,-1:]
-            truth_values = truth_values[:,-1:]
+            if 'itransformer' in self.args.stage:
+                eval_outputs = eval_outputs
+                truth_values = truth_values
+            else:
+                eval_outputs = eval_outputs[:,-1:]
+                truth_values = truth_values[:,-1:]
         rmse = ((eval_outputs - truth_values) ** 2).mean() ** 0.5
         return rmse
 
@@ -64,12 +72,19 @@ class AluminaTransformerForecasting(GeneralForecasting):
         eval_outputs = eval_outputs.cpu()
         truth_values = truth_values.cpu()
         if self.args.stage=='pretrain':
-            eval_outputs = eval_outputs[:,:,:-1]
-            truth_values = truth_values[:,:,:-1]
+            if 'itransformer' in self.args.stage:
+                eval_outputs = eval_outputs
+                truth_values = truth_values
+            else:
+                eval_outputs = eval_outputs[:,:,:-1]
+                truth_values = truth_values[:,:,:-1]
         else:
-            eval_outputs = eval_outputs[:,:,-1:]
-            truth_values = truth_values[:,:,-1:]
-        
+            if 'itransformer' in self.args.stage:
+                eval_outputs = eval_outputs
+                truth_values = truth_values
+            else:
+                eval_outputs = eval_outputs[:,:,-1:]
+                truth_values = truth_values[:,:,-1:]
         # print("Truth Value Shape:\n",truth_values)
         # print("Eval Output Shape:\n",eval_outputs.shape)
         # if self.pattern == 'pretrain':
@@ -112,10 +127,10 @@ class AluminaTransformerForecasting(GeneralForecasting):
         outputs = self._forward(samples_enc, None,  samples_dec, None)
        
         if self.args.stage=='pretrain':
-            if 'itransformer' in self.args.model_id:
+            if 'itransformer' in self.args.model_id: # itransformer selected
                 reg_outputs = outputs
                 reg_targets = targets_batch
-            else:
+            else: # transformer selected
                 reg_outputs = outputs[:,:,:-1]
                 reg_targets = targets_batch[:,:,:-1]
             # import pdb
@@ -124,13 +139,12 @@ class AluminaTransformerForecasting(GeneralForecasting):
             self.writer.add_scalar('loss/reg_loss', reg_loss.item(), curr_iter)
             train_loss = reg_loss
             # label_targets = targets_batch[:, -self.args.pred_len:, :-1]
-        else:
-            if 'itransformer' in self.args.model_id:
+        else: # self.args.stage == 'train' or 'train_only' or 'test'
+            if 'itransformer' in self.args.model_id: # itransformer selected
                 label_outputs = outputs
                 label_targets = targets_batch[:,-self.args.pred_len:,:]
-            else:
+            else: #transformer selected
                 label_outputs = outputs[:,:,-1:]
-                # reg_targets = targets_batch[:,:,-1:]
                 label_targets = targets_batch[:, -self.args.pred_len:, -1:]
 
             mask = torch.where(

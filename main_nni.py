@@ -83,9 +83,14 @@ def main(params):
     if args.stage == 'pretrain':
         print('>>>>>>>start pretraining : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
         forecasting_model.prefit()
-    if args.stage == 'train':
-        print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+        print('>>>>>>>end of pretraining : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+    elif args.stage == 'train':
+        print('>>>>>>>start finetuning : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
         forecasting_model.fit(args.key)
+        print('>>>>>>>end of finetuning : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+    elif args.stage == 'train_only':
+        print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+        forecasting_model.fit_only()
         print('>>>>>>>end of training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
     elif args.stage == 'test':
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.model_id))

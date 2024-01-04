@@ -14,3 +14,5 @@
 
 # nnictl create --config itransformer_pretrain.yaml --port 9000
 nnictl create --config itransformer_pretrain.yaml --port 9001
+
+nnictl create --config itransformer_train_only.yaml --port 9010
