@@ -12,4 +12,5 @@
 # nnictl create --config transformer_finetune.yaml --port 8094
 # nnictl create --config transformer_train.yaml --port 8087
 
-nnictl create --config itransformer_pretrain.yaml --port 9000
+# nnictl create --config itransformer_pretrain.yaml --port 9000
+nnictl create --config itransformer_pretrain.yaml --port 9001

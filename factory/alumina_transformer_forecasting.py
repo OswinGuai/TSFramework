@@ -112,9 +112,12 @@ class AluminaTransformerForecasting(GeneralForecasting):
         outputs = self._forward(samples_enc, None,  samples_dec, None)
        
         if self.args.stage=='pretrain':
-            reg_outputs = outputs[:,:,:-1]
-            # label_outputs = outputs[:,:,:-1]
-            reg_targets = targets_batch[:,:,:-1]
+            if 'itransformer' in self.args.model_id:
+                reg_outputs = outputs
+                reg_targets = targets_batch
+            else:
+                reg_outputs = outputs[:,:,:-1]
+                reg_targets = targets_batch[:,:,:-1]
             # import pdb
             # pdb.set_trace()
             reg_loss = self.criterion(reg_outputs, reg_targets)
@@ -122,10 +125,13 @@ class AluminaTransformerForecasting(GeneralForecasting):
             train_loss = reg_loss
             # label_targets = targets_batch[:, -self.args.pred_len:, :-1]
         else:
-            # reg_outputs = outputs[:,:,-1:]
-            label_outputs = outputs[:,:,-1:]
-            # reg_targets = targets_batch[:,:,-1:]
-            label_targets = targets_batch[:, -self.args.pred_len:, -1:]
+            if 'itransformer' in self.args.model_id:
+                label_outputs = outputs
+                label_targets = targets_batch[:,-self.args.pred_len:,:]
+            else:
+                label_outputs = outputs[:,:,-1:]
+                # reg_targets = targets_batch[:,:,-1:]
+                label_targets = targets_batch[:, -self.args.pred_len:, -1:]
 
             mask = torch.where(
                 label_targets.reshape([label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]]) == -999, 
