@@ -7,3 +7,4 @@ datasets/
 */*/__pycache__/
 ckeckpoints_itransformer/
 checkpoints_transformer/
+checkpoints_itransformer/alumina_itransformer/
