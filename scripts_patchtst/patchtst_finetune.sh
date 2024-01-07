@@ -16,9 +16,9 @@ python main_nni.py \
 --train_epochs 50 \
 --gpu 0 \
 --use_nni \
---model_id R47az \
+--model_id mR30X \
 --checkpoints ./checkpoints_patchtst/alumina_patchtst/ \
---key 0 \
+--key 12 \
 --hidden_dim 128 \
 --d_model 128 \
 --e_layers 1 \

@@ -54,7 +54,7 @@ class AluminaDataset(Dataset):
             start_indices = [i for i in range(int(data_len)-self.segment_len + 1)] # 6,2  0,1 1,2 2,3 3,4 4,5
             self.start_indices = start_indices
 
-        elif self.pattern == 'train' or self.pattern == 'train_only':
+        elif self.pattern == 'train' or self.pattern == 'train_only' or self.pattern == 'train_reg':
             # start_indices = [range(i - 60 + 1, i - 30 + 1) for i in self.valid_label]
             start_indices = [range(i - self.segment_len + 1, i - self.pred_len + 1) for i in self.valid_label]
             start_indices = start_indices[:-29]
@@ -70,7 +70,7 @@ class AluminaDataset(Dataset):
         samples = self.data_features[posi : posi + self.seq_len]
         # samples = np.concatenate((samples,np.ones((samples.shape[0],1))*-999),axis=1)
         targets = self.data_target[posi + self.seq_len : posi + self.seq_len + self.pred_len]
-        if self.pattern == 'train' or self.pattern == 'train_only':
+        if self.pattern == 'train' or self.pattern == 'train_only' or self.pattern == 'train_reg':
             for i in range(len(targets)):
                 if posi + self.seq_len + i not in self.valid_label:
                     targets[i,-1] = -999

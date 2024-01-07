@@ -35,9 +35,9 @@ parser.add_argument('--target_cols', type=str, help='')
 parser.add_argument('--timestamp_feature', type=str, help='')
 
 
-parser.add_argument('--seq_len', type=int, default=96, help='input sequence length of encoder')
+parser.add_argument('--seq_len', type=int, default=30, help='input sequence length of encoder')
 parser.add_argument('--label_len', type=int, default=12, help='start token length of decoder')
-parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
+parser.add_argument('--pred_len', type=int, default=30, help='prediction sequence length')
 parser.add_argument('--interval', type=int, default=900, help='')
 
 parser.add_argument('--model_name', type=str, required=True, default='transformer')
@@ -60,6 +60,8 @@ parser.add_argument('--batch_size', type=int, default=64, help='batch size of tr
 parser.add_argument('--patience', type=int, default=7, help='early stopping patience')
 parser.add_argument('--lr', type=float, default=0.0001, help='optimizer learning rate')
 parser.add_argument('--gpu', type=int, default=0, help='gpu')
+parser.add_argument('--label_loss_rate', type=float, default=0.5, help='the label loss ratio of train loss in train_reg stage')
+parser.add_argument('--reg_loss_rate', type=float, default=0.5, help='the regression loss ratio of train loss in train_reg stage')
 
 base_args = parser.parse_args()
 base_args.use_gpu = True if torch.cuda.is_available() else False
@@ -92,6 +94,10 @@ def main(params):
         print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
         forecasting_model.fit_only()
         print('>>>>>>>end of training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+    elif args.stage == 'train_reg':
+        print('>>>>>>>start training with regression: {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
+        forecasting_model.fit_reg()
+        print('>>>>>>>end of training with regression: {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(args.model_id))
     elif args.stage == 'test':
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.model_id))
         pred_rmse = forecasting_model.test(args.key)

@@ -17,12 +17,12 @@ cmd='''python main_nni.py
 --gpu 0 
 --use_nni
 --checkpoints ./checkpoints/alumina_transformer
---model_id zMflO
---key 4
+--model_id KNPKx
+--key 2
 --hidden_dim 128 
 --d_model 128 
---e_layers 1
---d_layers 1
+--e_layers 2
+--d_layers 2
 '''
 
 echo $cmd

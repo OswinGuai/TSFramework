@@ -58,7 +58,18 @@ class AluminaTransformerForecasting(GeneralForecasting):
             else: # transformer selected
                 eval_outputs = eval_outputs[:,:-1]
                 truth_values = truth_values[:,:-1]
-        else:
+        elif self.args.stage=='train_reg':
+            label_eval_outputs = eval_outputs[:,-1:]
+            label_truth_values = truth_values[:,-1:]
+            label_rmse = ((label_eval_outputs - label_truth_values) ** 2).mean() ** 0.5
+
+            reg_eval_outputs = eval_outputs[:,:-1]
+            reg_truth_outputs = truth_values[:,:-1]
+            reg_rmse = ((reg_eval_outputs - reg_truth_outputs) ** 2).mean() ** 0.5
+
+            return label_rmse, reg_rmse
+
+        else:# self.args.stage == 'train' or 'train_only' or 'test'
             if 'itransformer' in self.args.stage or 'patchtst' in self.args.model_id: # itransformer selected or patchtst selected
                 eval_outputs = eval_outputs
                 truth_values = truth_values
@@ -78,7 +89,26 @@ class AluminaTransformerForecasting(GeneralForecasting):
             else: # transformer selected
                 eval_outputs = eval_outputs[:,:,:-1]
                 truth_values = truth_values[:,:,:-1]
-        else:
+        
+        elif self.args.stage=='train_reg':
+            label_eval_outputs = eval_outputs[:,:,-1:]
+            label_truth_values = truth_values[:,:,-1:]
+
+            reg_eval_outputs = eval_outputs[:,:,:-1]
+            reg_truth_values = truth_values[:,:,:-1]
+
+            mask = torch.where(label_eval_outputs.reshape(
+                [label_truth_values.shape[0]*label_truth_values.shape[1],label_truth_values.shape[2]]) == -999, 
+                torch.zeros(label_truth_values.shape[0]*label_truth_values.shape[1],label_truth_values.shape[2]), 
+                torch.ones(label_truth_values.shape[0]*label_truth_values.shape[1],label_truth_values.shape[2])
+            )
+            label_rmse = (torch.sum(mask * ((label_eval_outputs - label_truth_values) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
+
+            reg_rmse = self.criterion(reg_eval_outputs,reg_truth_values)
+
+            return label_rmse, reg_rmse
+
+        else:# self.args.stage == 'train' or 'train_only' or 'test'
             if 'itransformer' in self.args.stage or 'patchtst' in self.args.model_id: # itransformer selected or patchtst selected
                 eval_outputs = eval_outputs
                 truth_values = truth_values
@@ -114,6 +144,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
         return label_outputs
 
     def batch_loss(self, samples_batch, targets_batch, datetimes_batch, curr_iter):
+        
         samples_enc = samples_batch[:,:self.args.seq_len,:]
         #datetimes_enc = torch.zeros([samples_batch.shape[0], self.args.seq_len, 1]).float().to(self.device)
         # samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]), 1)
@@ -135,6 +166,36 @@ class AluminaTransformerForecasting(GeneralForecasting):
             self.writer.add_scalar('loss/reg_loss', reg_loss.item(), curr_iter)
             train_loss = reg_loss
             # label_targets = targets_batch[:, -self.args.pred_len:, :-1]
+
+        elif self.args.stage=='train_reg':
+            '''
+            calculate both regression loss and label loss in training process
+            '''
+            reg_outputs = outputs[:,:,:-1]
+            reg_targets = targets_batch[:,:,:-1]
+            label_outputs = outputs[:,:,-1:]
+            label_targets = targets_batch[:, -self.args.pred_len:, -1:]
+
+            reg_loss = self.criterion(reg_outputs, reg_targets)
+            self.writer.add_scalar('loss/reg_loss', reg_loss.item(), curr_iter)
+
+            mask = torch.where(
+                label_targets.reshape([label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]]) == -999, 
+                torch.zeros(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device), 
+                torch.ones(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device)
+            )
+            if torch.sum(mask) == 0:
+                label_loss=0
+                self.writer.add_scalar('loss/label_loss', 0, curr_iter)
+            else:
+                label_loss = (torch.sum(mask * ((label_targets - label_outputs) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
+                self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
+            train_loss = self.args.label_loss_rate * label_loss + self.args.reg_loss_rate * reg_loss
+            # print("train_loss: ",train_loss)
+            # print("label_loss: ",label_loss)
+            # print("reg_loss: ",reg_loss)
+            return train_loss, label_loss, reg_loss
+
         else: # self.args.stage == 'train' or 'train_only' or 'test'
             if 'itransformer' in self.args.model_id or 'patchtst' in self.args.model_id: # itransformer selected or patchtst selected
                 label_outputs = outputs

@@ -15,10 +15,19 @@
 # nnictl create --config itransformer_pretrain.yaml --port 9000
 nnictl create --config itransformer_pretrain.yaml --port 9001
 
-nnictl create --config itransformer_train_only.yaml --port 9010
+nnictl create --config itransformer_train_only.yaml --port 9010 # underfit
+nnictl create --config itransformer_train_only.yaml --port 9011
+
+nnictl create --config itransformer_finetune.yaml --port 9020
 
 nnictl create --config patchtst_pretrain.yaml --port 9101
 
-nnictl create --config patchtst_train_only.yaml --port 9110
+nnictl create --config patchtst_train_only.yaml --port 9110 # underfit
+nnictl create --config patchtst_train_only.yaml --port 9112
+
+nnictl create --config patchtst_finetune.yaml --port 9120
 
 nnictl create --config transformer_train_only.yaml --port 9210
+nnictl create --config transformer_train_only.yaml --port 9211
+
+nnictl create --config transformer_train_reg.yaml --port 9250

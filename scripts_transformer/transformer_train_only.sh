@@ -23,7 +23,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 cmd='''python main_nni.py 
 --stage train_only 
---model_id alumina_transformer 
+--model_id alumina_transformer
 --model_name alumina_transformer 
 --log_path log 
 --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv 
@@ -40,6 +40,7 @@ cmd='''python main_nni.py
 --gpu 0 
 --use_nni
 --key '0'
+--checkpoints ./checkpoints/alumina_transformer_train_only
 '''
 
 echo $cmd

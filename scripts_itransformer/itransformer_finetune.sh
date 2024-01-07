@@ -16,7 +16,7 @@ python main_nni.py \
 --train_epochs 50 \
 --gpu 0 \
 --use_nni \
---model_id Jiata \
+--model_id zJ36A \
 --key 0 \
 --checkpoint ./checkpoints_itransformer/alumina_itransformer/ \
 --hidden_dim 128 \
