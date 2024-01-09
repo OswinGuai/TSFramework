@@ -31,3 +31,4 @@ nnictl create --config transformer_train_only.yaml --port 9210
 nnictl create --config transformer_train_only.yaml --port 9211
 
 nnictl create --config transformer_train_reg.yaml --port 9250
+nnictl create --config transformer_train_reg.yaml --port 9251

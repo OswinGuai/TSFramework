@@ -16,9 +16,13 @@ cmd='''python main_nni.py
 --train_epochs 50 
 --gpu 0
 --use_nni
---checkpoints ./checkpoints/alumina_transformer_train_reg/alumina_transformer
---model_id STANDALONE
+--checkpoints ./checkpoints_train_reg/alumina_transformer
+--model_id UAEBU
 --key 0
+--hidden_dim 128
+--d_model 128
+--e_layers 1
+--d_layers 1
 '''
 
 echo $cmd
