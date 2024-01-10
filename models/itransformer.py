@@ -28,6 +28,8 @@ class iTransformer(nn.Module):
 
         # Encoding
         self.enc_embedding = DataEmbedding_inverted(seq_len, d_model, 'timeF', 'h', dropout)
+        # TODO: SET 56 ENCODER EMBEDDING
+        # TODO: set label_length 2; set seq_len&pred_len 10
 
         # Encoder
         self.encoder = Encoder(
@@ -62,6 +64,8 @@ class iTransformer(nn.Module):
         if self.timestamp_feature != 'none':
             x_mark_enc = None
         enc_out = self.enc_embedding(x_enc, x_mark_enc) 
+        # TODO:  one embedding  input N,S,1 => N,1,S => N,1,d_model
+        # TODO: 56 embedding concat: N,C,D_model  
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
         dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N] # filter the covariates 
 
