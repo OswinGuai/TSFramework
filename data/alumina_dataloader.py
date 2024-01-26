@@ -13,13 +13,13 @@ class AluminaDataset(Dataset):
     feature_scaler = StandardScaler()
     target_scaler = StandardScaler()
 
-    def __init__(self, csv_path, segment_len, feature_cols, target_cols, datetime_col='Time', interval='none', timestamp_feature='none', init_scaler=True, pattern='train'):
+    def __init__(self, csv_path, segment_len,seq_len,pred_len, feature_cols, target_cols, datetime_col='Time', interval='none', timestamp_feature='none', init_scaler=True, pattern='train'):
 
         # init
         self.csv_path = csv_path
         self.segment_len = segment_len
-        self.seq_len = segment_len-30
-        self.pred_len = 30
+        self.seq_len = seq_len
+        self.pred_len = pred_len
         self.feature_cols = feature_cols.split(',')
         self.pattern = pattern
         self.target_cols = target_cols.split(',')

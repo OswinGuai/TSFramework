@@ -1,6 +1,6 @@
-export CUDA_VISIBLE_DEVICES=4
 cmd='''python main_nni.py 
 --stage test 
+--model_id alumina_transformer 
 --model_name alumina_transformer 
 --log_path log 
 --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv 
@@ -14,16 +14,15 @@ cmd='''python main_nni.py
 --pred_len 30 
 --timestamp_feature none  
 --train_epochs 50 
---gpu 0
+--gpu 0 
 --use_nni
---checkpoints ./checkpoints/alumina_transformer_train_only/alumina_transformer_trial9212
---model_id AOUdi
---key 0
---hidden_dim 128
---d_model 128
+--checkpoints ./checkpoints/alumina_transformer
+--model_id KNPKx
+--key 2
+--hidden_dim 128 
+--d_model 128 
 --e_layers 2
 --d_layers 2
---d_ff 1024
 '''
 
 echo $cmd

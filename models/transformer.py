@@ -85,4 +85,3 @@ class Transformer(nn.Module):
         self.global_step = self.global_step + 1
 
         return outputs[:, -self.pred_len:, :]
-

@@ -10,6 +10,7 @@ import torch.nn as nn
 class AluminaTransformerForecasting(GeneralForecasting):
     model_choices = {
             'alumina_transformer': Transformer,
+            'alumina_transformer_new': Transformer_new,
             'alumina_itransformer': iTransformer,
             'alumina_patchtst': PatchTST,
             'alumina_lstm': LSTM,
@@ -33,6 +34,8 @@ class AluminaTransformerForecasting(GeneralForecasting):
         dataset = AluminaDataset(
                 csv_path=csv_path,
                 segment_len=(args.pred_len + args.seq_len),
+                seq_len = args.seq_len,
+                pred_len = args.pred_len,
                 feature_cols=args.feature_cols,
                 target_cols=args.target_cols,
                 datetime_col=args.datetime_col,

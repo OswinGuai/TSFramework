@@ -31,6 +31,21 @@ class PatchEmbedding(nn.Module):
         x = self.value_embedding(x) + self.position_embedding(x)
         return self.dropout(x), n_vars
 
+class DataEmbedding(nn.Module):
+    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+        super(DataEmbedding, self).__init__()
+
+        self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
+        self.position_embedding = PositionalEmbedding(d_model=d_model)
+        #self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type, freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(d_model=d_model, embed_type=embed_type, freq=freq)
+
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x):
+        #x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
+        x = self.value_embedding(x) + self.position_embedding(x)
+
+        return self.dropout(x)
 
 class DataEmbedding_inverted(nn.Module):
     def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
@@ -46,6 +61,50 @@ class DataEmbedding_inverted(nn.Module):
         else:
             # the potential to take covariates (e.g. timestamps) as tokens
             x = self.value_embedding(torch.cat([x, x_mark.permute(0, 2, 1)], 1)) 
+        # x: [Batch Variate d_model]
+        return self.dropout(x)
+    
+class DataEmbedding_linear(nn.Module):
+    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+        super(DataEmbedding_linear, self).__init__()
+        self.value_embedding = nn.Linear(c_in, d_model)
+        self.position_embedding = PositionalEmbedding(d_model=d_model)
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x):
+        x = self.value_embedding(x) + self.position_embedding(x)
+        # x = self.value_embedding(x)
+        return self.dropout(x)
+    
+class DataEmbedding_linear_noPosition(nn.Module):
+    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+        super(DataEmbedding_linear_noPosition, self).__init__()
+        self.value_embedding = nn.Linear(c_in, d_model)
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x):
+        x = self.value_embedding(x)
+        return self.dropout(x)
+    
+class DataEmbedding_inverted_new(nn.Module):
+    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+        super(DataEmbedding_inverted_new, self).__init__()
+        self.value_embedding = TokenEmbedding(c_in=c_in,d_model=d_model)
+        self.position_embedding = PositionalEmbedding(d_model=d_model)
+        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type,
+                                                    freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
+            d_model=d_model, embed_type=embed_type, freq=freq)
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x, x_mark):
+        x = x.permute(0, 2, 1)
+        # x: [Batch Variate Time]
+        if x_mark is None:
+            x = self.value_embedding(x) + self.position_embedding(x)
+        else:
+            # the potential to take covariates (e.g. timestamps) as tokens
+            x = self.value_embedding(
+                x) + self.temporal_embedding(x_mark) + self.position_embedding(x)
         # x: [Batch Variate d_model]
         return self.dropout(x)
 
@@ -300,19 +359,5 @@ class CycleTimeEmbedding(nn.Module):
         return self.dropout(x_emb)
 
 
-class DataEmbedding(nn.Module):
-    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
-        super(DataEmbedding, self).__init__()
 
-        self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
-        self.position_embedding = PositionalEmbedding(d_model=d_model)
-        #self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type, freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(d_model=d_model, embed_type=embed_type, freq=freq)
-
-        self.dropout = nn.Dropout(p=dropout)
-
-    def forward(self, x):
-        #x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
-        x = self.value_embedding(x) + self.position_embedding(x)
-
-        return self.dropout(x)
 

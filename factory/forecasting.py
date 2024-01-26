@@ -356,17 +356,17 @@ class GeneralForecasting:
         predict_outputs = torch.cat(outputs_list, dim=0)
         predict_outputs = predict_outputs[:,-1:,:]
         # * from scratch
-        # predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
+        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
         # * finetune
-        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 57]).cpu())
+        # predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 57]).cpu())
         predict_outputs = predict_outputs[:,-1:]
 
         target_outputs = torch.cat(target_list, dim=0)
         target_outputs = target_outputs[:,-1:,:]
         # * from_scratch
-        # target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
+        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
         # * finetune
-        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 57]).cpu())
+        # target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 57]).cpu())
         target_outputs = target_outputs[:,-1:]
         
         # predict_outputs = torch.cat(outputs_list, dim=0)

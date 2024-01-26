@@ -7,7 +7,7 @@ from models.modules.decoder import Decoder, DecoderLayer
 from models.modules.encoder import Encoder, EncoderLayer
 
 from models.modules.attn import FullAttention, AttentionLayer
-from models.modules.embed import DataEmbedding, DateEmbedding, CycleTimeEmbedding, DataEmbedding_inverted
+from models.modules.embed import DataEmbedding, DateEmbedding, CycleTimeEmbedding, DataEmbedding_inverted,DataEmbedding_inverted_new
 import pdb
 
 
@@ -27,9 +27,12 @@ class iTransformer(nn.Module):
         self.stage = stage
 
         # Encoding
-        self.enc_embedding = DataEmbedding_inverted(seq_len, d_model, 'timeF', 'h', dropout)
+        # & original enc_embedding
+        # self.enc_embedding = DataEmbedding_inverted(seq_len, d_model, 'timeF', 'h', dropout)
+        # self.enc_embedding = DataEmbedding_inverted_new(seq_len, d_model, 'timeF', 'h', dropout)
         # TODO: SET 56 ENCODER EMBEDDING
         # TODO: set label_length 2; set seq_len&pred_len 10
+        self.enc_embedding = nn.ModuleList([DataEmbedding_inverted(seq_len, d_model, 'timeF', 'h', dropout) for i in range(self.enc_in)])
 
         # Encoder
         self.encoder = Encoder(
@@ -49,7 +52,7 @@ class iTransformer(nn.Module):
         self.projector = nn.Linear(d_model, self.pred_len, bias=True)
 
         # self.target_projector = nn.Linear(self.enc_in, self.c_out, bias=True)
-        self.target_projector = nn.Linear(self.enc_in, 1, bias=True)
+        # self.target_projector = nn.Linear(self.enc_in, 1, bias=True)
 
         self.global_step = 0
 
@@ -63,14 +66,28 @@ class iTransformer(nn.Module):
         _, _, N = x_enc.shape # B L N
         if self.timestamp_feature != 'none':
             x_mark_enc = None
-        enc_out = self.enc_embedding(x_enc, x_mark_enc) 
+
+        # & original enc_embedding calculation
+        # enc_out = self.enc_embedding(x_enc, x_mark_enc) 
+        
+        # import pdb
+        # pdb.set_trace()
         # TODO:  one embedding  input N,S,1 => N,1,S => N,1,d_model
         # TODO: 56 embedding concat: N,C,D_model  
+        # & channel independent enc_embedding calculation
+        enc_out_single_array=[]
+        for index in range(self.enc_in):
+            x_enc_single = x_enc[:,:,index].unsqueeze(2)
+            enc_out_single = self.enc_embedding[index](x_enc_single,x_mark_enc)
+            enc_out_single_array.append(enc_out_single)
+        enc_out = torch.cat(enc_out_single_array,dim=1)
+        
+
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
         dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N] # filter the covariates 
 
-        if self.stage=='train':
-            dec_out = self.target_projector(dec_out)
+        # if self.stage=='train':
+        #     dec_out = self.target_projector(dec_out)
         dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         return dec_out[:,:,:self.c_out]

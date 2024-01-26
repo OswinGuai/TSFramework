@@ -1,7 +1,8 @@
 {
-    "hidden_dim": {"_type":"choice","_value":[256,512]},
-    "lr": {"_type":"choice","_value":[0.001,0.0001,0.0003]},
-    "d_model": {"_type":"choice","_value":[256,512]},
-    "d_layers": {"_type":"choice","_value":[1,2,3]},
-    "e_layers": {"_type":"choice","_value":[1,2,3]}
+    "hidden_dim": {"_type":"choice","_value":[256]},
+    "lr": {"_type":"choice","_value":[0.0001,0.0003,0.00003]},
+    "d_model": {"_type":"choice","_value":[256]},
+    "d_layers": {"_type":"choice","_value":[1]},
+    "e_layers": {"_type":"choice","_value":[3,4,5]},
+    "d_ff": {"_type":"choice","_value":[2048,1024,512]}
 }
