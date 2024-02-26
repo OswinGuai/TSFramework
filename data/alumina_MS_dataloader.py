@@ -8,7 +8,7 @@ import pdb
 
 warnings.filterwarnings('ignore')
 
-class AluminaDataset(Dataset):
+class AluminaMSDataset(Dataset):
 
     feature_scaler = StandardScaler()
     target_scaler = StandardScaler()
@@ -38,34 +38,19 @@ class AluminaDataset(Dataset):
 
         data_features = data[self.feature_cols]
         data_target = data[self.target_cols]
-        # self.valid_label = np.arange(1, data.shape[0]/30 + 1) * 30 - 1
-        self.valid_label = np.arange(1, int(data.shape[0]/120) + 1) * 120 - 1
-
 
         if self.init_scaler:
             self.feature_scaler.fit(data_features)
-            self.target_scaler.fit(data_target.iloc[self.valid_label])
+            self.target_scaler.fit(data_target)
         self.data_features = self.feature_scaler.transform(data_features)
         self.data_target = self.target_scaler.transform(data_target)
 
         # get temporally length-fixed samples from data_features
         data_len = len(data_features)
-        if self.pattern == 'pretrain':
-            start_indices = [i for i in range(int(data_len)-self.segment_len + 1)] # 6,2  0,1 1,2 2,3 3,4 4,5
-            self.start_indices = start_indices
+ 
+        start_indices = [i for i in range(int(data_len)-self.segment_len + 1)]
+        self.start_indices = start_indices
 
-        elif self.pattern == 'train' or self.pattern == 'train_only' or self.pattern == 'train_reg':
-            # start_indices = [range(i - 60 + 1, i - 30 + 1) for i in self.valid_label]
-            start_indices = [range(i - self.segment_len + 1, i - self.pred_len + 1) for i in self.valid_label]
-            start_indices = start_indices[:-29]
-
-            # # * change in 20240226: add true data to decoder input
-            # start_indices = [i-self.segment_len+1 for i in self.valid_label]
-            # self.start_indices = start_indices
-
-            self.start_indices = np.concatenate(start_indices)
-        else: # self.pattern == 'test'
-            self.start_indices = self.valid_label - self.segment_len + 1
 
 
     def __getitem__(self, index):
@@ -73,17 +58,8 @@ class AluminaDataset(Dataset):
         targets=[]
         samples = self.data_features[posi : posi + self.seq_len]
 
-        # # * change in 20240226: add true data to decoder input
-        # samples = self.data_features[posi : posi + self.seq_len + self.pred_len]
-
-
-        # samples = np.concatenate((samples,np.ones((samples.shape[0],1))*-999),axis=1)
         targets = self.data_target[posi + self.seq_len : posi + self.seq_len + self.pred_len]
-        if self.pattern == 'train' or self.pattern == 'train_only' or self.pattern == 'train_reg':
-            for i in range(len(targets)):
-                if posi + self.seq_len + i not in self.valid_label:
-                    targets[i,-1] = -999
-            # standardize targets
+        
         return samples, np.array(targets, dtype=float), 0
         
 

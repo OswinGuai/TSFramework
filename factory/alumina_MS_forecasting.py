@@ -1,6 +1,6 @@
 from factory.forecasting import GeneralForecasting
 from models import *
-from data.alumina_dataloader import AluminaDataset
+from data.alumina_MS_dataloader import AluminaMSDataset
 from torch.utils.data import DataLoader
 
 import torch
@@ -10,7 +10,7 @@ import nni
 import pandas as pd
 
 
-class AluminaTransformerForecasting(GeneralForecasting):
+class AluminaTransformerMSForecasting(GeneralForecasting):
     model_choices = {
             'alumina_transformer': Transformer,
             'alumina_transformer_new': Transformer_new,
@@ -34,7 +34,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
         return self._create_data(args, csv_path, batch_size, shuffle=shuffle, num_workers=num_workers, drop_last=drop_last, init_scaler=init_scaler, pattern=key)
 
     def _create_data(self, args, csv_path, batch_size, shuffle=True, num_workers=1, drop_last=True, init_scaler=True, pattern='train'):
-        dataset = AluminaDataset(
+        dataset = AluminaMSDataset(
                 csv_path=csv_path,
                 segment_len=(args.pred_len + args.seq_len),
                 seq_len = args.seq_len,
@@ -103,12 +103,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
             reg_eval_outputs = eval_outputs[:,:,:-1]
             reg_truth_values = truth_values[:,:,:-1]
 
-            mask = torch.where(label_eval_outputs.reshape(
-                [label_truth_values.shape[0]*label_truth_values.shape[1],label_truth_values.shape[2]]) == -999, 
-                torch.zeros(label_truth_values.shape[0]*label_truth_values.shape[1],label_truth_values.shape[2]), 
-                torch.ones(label_truth_values.shape[0]*label_truth_values.shape[1],label_truth_values.shape[2])
-            )
-            label_rmse = (torch.sum(mask * ((label_eval_outputs - label_truth_values) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
+            label_rmse = ((label_eval_outputs - label_truth_values) ** 2).mean() ** 0.5
 
             reg_rmse = self.criterion(reg_eval_outputs,reg_truth_values)
 
@@ -122,14 +117,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
                 eval_outputs = eval_outputs[:,:,-1:]
                 truth_values = truth_values[:,:,-1:]
         
-        mask = torch.where(truth_values.reshape(
-            [truth_values.shape[0]*truth_values.shape[1],truth_values.shape[2]]) == -999, 
-            torch.zeros(truth_values.shape[0]*truth_values.shape[1],truth_values.shape[2]), 
-            torch.ones(truth_values.shape[0]*truth_values.shape[1],truth_values.shape[2])
-        )
-        if torch.sum(mask) == 0:
-            raise Exception('testset is mistaken')
-        rmse = (torch.sum(mask * ((eval_outputs - truth_values) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
+        rmse = ((eval_outputs - truth_values) ** 2).mean() ** 0.5
         self.writer.add_scalar('eval/rmse', rmse, epoch)
         return rmse
 
@@ -142,10 +130,6 @@ class AluminaTransformerForecasting(GeneralForecasting):
         #datetimes_enc = datetimes_batch
         B, S, V = samples_enc.shape
         samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
-
-        #  # * change in 20240226: add true data to decoder input
-        # samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, -self.args.pred_len:, :]), 1)
-
 
         #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, datetimes_enc.shape[2]]).float().to(self.device)), 1)
         #outputs = self._forward(samples_enc, datetimes_enc,  samples_dec, datetimes_dec)
@@ -161,9 +145,6 @@ class AluminaTransformerForecasting(GeneralForecasting):
         # samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]), 1)
         B, S, V = samples_enc.shape
         samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
-
-        # # * change in 20240226: add true data to decoder input
-        # samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, -self.args.pred_len:, :]), 1)
 
         #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([samples_batch.shape[0], self.args.pred_len, 1]).to(self.device).float()), 1)
         outputs = self._forward(samples_enc, None,  samples_dec, None)
@@ -197,17 +178,8 @@ class AluminaTransformerForecasting(GeneralForecasting):
             reg_loss = self.criterion(reg_outputs, reg_targets)
             self.writer.add_scalar('loss/reg_loss', reg_loss.item(), curr_iter)
 
-            mask = torch.where(
-                label_targets.reshape([label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]]) == -999, 
-                torch.zeros(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device), 
-                torch.ones(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device)
-            )
-            if torch.sum(mask) == 0:
-                label_loss=0
-                self.writer.add_scalar('loss/label_loss', 0, curr_iter)
-            else:
-                label_loss = (torch.sum(mask * ((label_targets - label_outputs) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
-                self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
+            label_loss = self.criterion(label_outputs,label_targets)
+            self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
             train_loss = self.args.label_loss_rate * label_loss + self.args.reg_loss_rate * reg_loss
             # print("train_loss: ",train_loss)
             # print("label_loss: ",label_loss)
@@ -222,19 +194,10 @@ class AluminaTransformerForecasting(GeneralForecasting):
                 label_outputs = outputs[:,:,-1:]
                 label_targets = targets_batch[:, -self.args.pred_len:, -1:]
 
-            mask = torch.where(
-                label_targets.reshape([label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]]) == -999, 
-                torch.zeros(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device), 
-                torch.ones(label_targets.shape[0]*label_targets.shape[1],label_targets.shape[2]).to(self.device)
-            )
-            if torch.sum(mask) == 0:
-                self.writer.add_scalar('loss/label_loss', 0, curr_iter)
-                return -999
-            else:
-                label_loss = (torch.sum(mask * ((label_targets - label_outputs) ** 2).reshape(mask.shape)) / torch.sum(mask)) ** 0.5
-                #train_loss = 5 * label_loss + reg_loss
-                train_loss = label_loss 
-                self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
+            label_loss = self.criterion(label_outputs,label_targets)
+            #train_loss = 5 * label_loss + reg_loss
+            train_loss = label_loss 
+            self.writer.add_scalar('loss/label_loss', label_loss.item(), curr_iter)
         # label_outputs = outputs[:,:,-self.args.pred_len:]
         # reg_targets = samples_batch[:,:,-self.args.pred_len:]
         # label_targets = targets_batch[:, -self.args.pred_len:, :]
@@ -260,14 +223,13 @@ class AluminaTransformerForecasting(GeneralForecasting):
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
                 train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
-                if train_loss != -999:
-                    self.backward(train_loss)
+                
+                self.backward(train_loss)
 
                 if (i + 1) % int(num_batch/5) == 0:
-                    if train_loss != -999:
-                        print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
-                    else:
-                        print("\titers: {0}, epoch: {1} | train_loss : -999".format(i + 1, epoch + 1))
+                    
+                    print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
+                    
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * num_batch - i)
                     print('\tspeed: {:.6f}s/iter; left time: {:.6f}s'.format(speed, left_time))
@@ -317,14 +279,13 @@ class AluminaTransformerForecasting(GeneralForecasting):
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
                 train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
-                if train_loss != -999:
-                    self.backward(train_loss)
+                
+                self.backward(train_loss)
 
                 if (i + 1) % int(num_batch/5) == 0:
-                    if train_loss != -999:
-                        print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
-                    else:
-                        print("\titers: {0}, epoch: {1} | train_loss : -999".format(i + 1, epoch + 1))
+                    
+                    print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
+                    
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * num_batch - i)
                     print('\tspeed: {:.6f}s/iter; left time: {:.6f}s'.format(speed, left_time))
@@ -372,14 +333,13 @@ class AluminaTransformerForecasting(GeneralForecasting):
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
                 train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
-                if train_loss != -999:
-                    self.backward(train_loss)
+                
+                self.backward(train_loss)
 
                 if (i + 1) % int(num_batch/5) == 0:
-                    if train_loss != -999:
-                        print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
-                    else:
-                        print("\titers: {0}, epoch: {1} | train_loss : -999".format(i + 1, epoch + 1))
+                    
+                    print("\titers: {0}, epoch: {1} | train_loss : {2:.4f}".format(i + 1, epoch + 1, train_loss.item()))
+                    
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * num_batch - i)
                     print('\tspeed: {:.6f}s/iter; left time: {:.6f}s'.format(speed, left_time))
@@ -427,14 +387,13 @@ class AluminaTransformerForecasting(GeneralForecasting):
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
                 train_loss, label_loss, reg_loss= self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
-                if train_loss != -999:
-                    self.backward(train_loss)
+                
+                self.backward(train_loss)
 
                 if (i + 1) % int(num_batch/5) == 0:
-                    if train_loss != -999:
-                        print("\titers: {0}, epoch: {1} | train_loss : {2:.4f} | label_loss : {3:.4f} | reg_loss : {4:.4f}".format(i + 1, epoch + 1, train_loss.item(),label_loss.item(),reg_loss.item()))
-                    else:
-                        print("\titers: {0}, epoch: {1} | train_loss : -999".format(i + 1, epoch + 1))
+                    
+                    print("\titers: {0}, epoch: {1} | train_loss : {2:.4f} | label_loss : {3:.4f} | reg_loss : {4:.4f}".format(i + 1, epoch + 1, train_loss.item(),label_loss.item(),reg_loss.item()))
+                   
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * num_batch - i)
                     print('\tspeed: {:.6f}s/iter; left time: {:.6f}s'.format(speed, left_time))

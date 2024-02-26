@@ -2,6 +2,7 @@ import argparse
 import torch
 from factory.transformer_forecasting import TransformerForecasting
 from factory.alumina_transformer_forecasting import AluminaTransformerForecasting
+from factory.alumina_MS_forecasting import AluminaTransformerMSForecasting
 import random
 import numpy as np
 import nni
@@ -25,6 +26,7 @@ parser.add_argument('--model_id', type=str, required=True, help='model id')
 parser.add_argument('--log_path', type=str, required=True, help='log')
 parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
 parser.add_argument('--key', type=str, help='model id')
+parser.add_argument('--task_name', type=str, default='F', help='type of running task. F for original forecasting, MS for multi-series forecasting(TimeXer)')
 
 parser.add_argument('--trainset_csv_path', type=str, required=True, help='')
 parser.add_argument('--validset_csv_path', type=str, required=True, help='')
@@ -72,7 +74,12 @@ def main(params):
     print('Args in experiment:')
     print(args)
     # set experiments
-    factory_list = [TransformerForecasting, AluminaTransformerForecasting]
+    if args.task_name == 'F':
+        factory_list = [TransformerForecasting, AluminaTransformerForecasting]
+        print('Performing Original Forecasting')
+    elif args.task_name == 'MS':
+        factory_list = [TransformerForecasting, AluminaTransformerMSForecasting]
+        print('Performing MS Forecasting (TimeXer)')
     forecasting_model = None
     for f in factory_list:
         if args.model_name in f.model_choices.keys():
