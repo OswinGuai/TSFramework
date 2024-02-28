@@ -45,7 +45,10 @@ class GeneralForecasting:
         self.writer = SummaryWriter(self.log_path)
         param_dict = vars(self.args)
         final_param = dict(param_dict, **model_params)
+        # import pdb
+        # pdb.set_trace()
         self.model = self.model_choices[args.model_name](**final_param).to(self.device)
+        
         self.optimizer = self._build_optimizer(self.model.parameters(), args)
         self.stepper = self._build_scheduler(self.optimizer)
     

@@ -1,5 +1,6 @@
 from factory.forecasting import GeneralForecasting
 from models import *
+from models import TimeXer
 from data.alumina_MS_dataloader import AluminaMSDataset
 from torch.utils.data import DataLoader
 
@@ -17,6 +18,7 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
             'alumina_itransformer': iTransformer,
             'alumina_patchtst': PatchTST,
             'alumina_lstm': LSTM,
+            'alumina_timexer' : TimeXer,
             }
 
     def __init__(self, args):
@@ -114,6 +116,8 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
                 eval_outputs = eval_outputs
                 truth_values = truth_values
             else: # transformer selected
+                # import pdb
+                # pdb.set_trace()
                 eval_outputs = eval_outputs[:,:,-1:]
                 truth_values = truth_values[:,:,-1:]
         
@@ -204,6 +208,7 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
             
         self.writer.add_scalar('loss/train_loss', train_loss.item(), curr_iter)
         return train_loss
+    
     def prefit(self):
         time_now = time.time()
         training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='pretrain')

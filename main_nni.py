@@ -26,7 +26,14 @@ parser.add_argument('--model_id', type=str, required=True, help='model id')
 parser.add_argument('--log_path', type=str, required=True, help='log')
 parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
 parser.add_argument('--key', type=str, help='model id')
-parser.add_argument('--task_name', type=str, default='F', help='type of running task. F for original forecasting, MS for multi-series forecasting(TimeXer)')
+parser.add_argument('--task_name', type=str, default='Forecast', help='type of running task.')
+parser.add_argument('--features', type=str, default='M',
+                        help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
+parser.add_argument('--embed', type=str, default='timeF',
+                        help='time features encoding, options:[timeF, fixed, learned]')
+parser.add_argument('--freq', type=str, default='h',
+                        help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
+
 
 parser.add_argument('--trainset_csv_path', type=str, required=True, help='')
 parser.add_argument('--validset_csv_path', type=str, required=True, help='')
@@ -65,6 +72,10 @@ parser.add_argument('--gpu', type=int, default=0, help='gpu')
 parser.add_argument('--label_loss_rate', type=float, default=0.5, help='the label loss ratio of train loss in train_reg stage')
 parser.add_argument('--reg_loss_rate', type=float, default=0.5, help='the regression loss ratio of train loss in train_reg stage')
 
+parser.add_argument('--use_norm', type=int, default=1, help='instance norm')
+parser.add_argument('--patch_len', type=int, default=16, help='input sequence length')
+parser.add_argument('--target_num', type=int, default=1, help='target num')
+
 base_args = parser.parse_args()
 base_args.use_gpu = True if torch.cuda.is_available() else False
 
@@ -74,11 +85,11 @@ def main(params):
     print('Args in experiment:')
     print(args)
     # set experiments
-    if args.task_name == 'F':
-        factory_list = [TransformerForecasting, AluminaTransformerForecasting]
-        print('Performing Original Forecasting')
-    elif args.task_name == 'MS':
+    if args.features == 'M' or args.features == 'MS':
         factory_list = [TransformerForecasting, AluminaTransformerMSForecasting]
+        print('Performing Original Forecasting')
+    else:
+        factory_list = [TransformerForecasting, AluminaTransformerForecasting]
         print('Performing MS Forecasting (TimeXer)')
     forecasting_model = None
     for f in factory_list:
