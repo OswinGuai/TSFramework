@@ -1,0 +1,276 @@
+python -u main_nni.py --stage train_only --model_id alumina_timexer --model_name alumina_timexer --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效蒸发器汽温 --target_cols 1效蒸发器汽温 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_timexer_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_timexer/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_timexer/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_timexer_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效蒸发器汽温', target_cols='1效蒸发器汽温', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_timexer', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_timexer/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+python -u main_nni.py --stage train_only --model_id alumina_timexer --model_name alumina_timexer --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效蒸发器汽室压力 --target_cols 1效蒸发器汽室压力 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_timexer_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_timexer/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_timexer/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_timexer_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效蒸发器汽室压力', target_cols='1效蒸发器汽室压力', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_timexer', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_timexer/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+python -u main_nni.py --stage train_only --model_id alumina_timexer --model_name alumina_timexer --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效原液换热前温度 --target_cols 1效原液换热前温度 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_timexer_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_timexer/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_timexer/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_timexer_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效原液换热前温度', target_cols='1效原液换热前温度', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_timexer', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_timexer/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+python -u main_nni.py --stage train_only --model_id alumina_timexer --model_name alumina_timexer --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效出料温度 --target_cols 1效出料温度 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_timexer_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_timexer/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_timexer/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_timexer_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效出料温度', target_cols='1效出料温度', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_timexer', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_timexer/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous
+Traceback (most recent call last):
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 138, in <module>
+    main(params)
+  File "/workspace/qiuyunzhong/TSFramework/main_nni.py", line 114, in main
+    forecasting_model.fit_only()
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 456, in fit_only
+    train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 153, in batch_loss
+    outputs = self._forward(samples_enc, None,  samples_dec, None)
+  File "/workspace/qiuyunzhong/TSFramework/factory/alumina_MS_forecasting.py", line 128, in _forward
+    model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 242, in forward
+    dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 170, in forecast
+    dec_out = self.decoder(enc_out, co_enc_out)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/Transformer_EncDec.py", line 132, in forward
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, tau=tau, delta=delta)
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/models/TimeXer.py", line 73, in forward
+    x_glb_attn = self.dropout(self.cross_attention(
+  File "/home/qiuyunzhong/anaconda3/envs/tsframe/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/qiuyunzhong/TSFramework/layers/SelfAttention_Family.py", line 322, in forward
+    keys = self.key_projection(keys).view(B, S, H, -1)
+RuntimeError: cannot reshape tensor of 0 elements into shape [64, 0, 8, -1] because the unspecified dimension size -1 can be any value and is ambiguous

@@ -87,10 +87,11 @@ def main(params):
     # set experiments
     if args.features == 'M' or args.features == 'MS':
         factory_list = [TransformerForecasting, AluminaTransformerMSForecasting]
-        print('Performing Original Forecasting')
+        print('Performing MS Forecasting (TimeXer)')
+        
     else:
         factory_list = [TransformerForecasting, AluminaTransformerForecasting]
-        print('Performing MS Forecasting (TimeXer)')
+        print('Performing Original Forecasting')
     forecasting_model = None
     for f in factory_list:
         if args.model_name in f.model_choices.keys():

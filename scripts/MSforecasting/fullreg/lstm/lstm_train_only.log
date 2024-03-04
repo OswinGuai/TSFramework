@@ -1,0 +1,768 @@
+python -u main_nni.py --stage train_only --model_id alumina_lstm --model_name alumina_lstm --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效蒸发器汽温 --target_cols 1效蒸发器汽温 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_lstm_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_lstm/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_lstm/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_lstm_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效蒸发器汽温', target_cols='1效蒸发器汽温', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_lstm', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+	iters: 382, epoch: 1 | train_loss : 0.0563
+	speed: 0.015960s/iter; left time: 1518.939111s
+	iters: 764, epoch: 1 | train_loss : 0.0029
+	speed: 0.009846s/iter; left time: 933.250749s
+	iters: 1146, epoch: 1 | train_loss : 0.0037
+	speed: 0.010055s/iter; left time: 949.225800s
+	iters: 1528, epoch: 1 | train_loss : 0.0060
+	speed: 0.009406s/iter; left time: 884.382853s
+	iters: 1910, epoch: 1 | train_loss : 0.0009
+	speed: 0.009966s/iter; left time: 933.214595s
+[2024-03-01 13:57:15] [32mIntermediate result: 0.029946554452180862  (Index 0)[0m
+Epoch: 1 | cost time: 71.07574772834778 | valid_loss: 0.029946554452180862 | valid_loss_true: 1.7789235527933263
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-0.pth
+Adjusting learning rate of group 0 to 8.5000e-05.
+	iters: 382, epoch: 2 | train_loss : 0.0012
+	speed: 0.145146s/iter; left time: 13536.002137s
+	iters: 764, epoch: 2 | train_loss : 0.0028
+	speed: 0.010053s/iter; left time: 933.653377s
+	iters: 1146, epoch: 2 | train_loss : 0.0328
+	speed: 0.010230s/iter; left time: 946.207684s
+	iters: 1528, epoch: 2 | train_loss : 0.0007
+	speed: 0.012094s/iter; left time: 1114.001631s
+	iters: 1910, epoch: 2 | train_loss : 0.0013
+	speed: 0.010326s/iter; left time: 947.243178s
+[2024-03-01 13:58:27] [32mIntermediate result: 0.030006706714630127  (Index 1)[0m
+Epoch: 2 | cost time: 71.44195604324341 | valid_loss: 0.030006706714630127 | valid_loss_true: 1.7623618980413387
+Adjusting learning rate of group 0 to 7.2250e-05.
+	iters: 382, epoch: 3 | train_loss : 0.0016
+	speed: 0.144096s/iter; left time: 13162.758011s
+	iters: 764, epoch: 3 | train_loss : 0.0011
+	speed: 0.008494s/iter; left time: 772.696183s
+	iters: 1146, epoch: 3 | train_loss : 0.0064
+	speed: 0.009582s/iter; left time: 867.976562s
+	iters: 1528, epoch: 3 | train_loss : 0.0611
+	speed: 0.012204s/iter; left time: 1100.843165s
+	iters: 1910, epoch: 3 | train_loss : 0.0010
+	speed: 0.012745s/iter; left time: 1144.783096s
+[2024-03-01 13:59:39] [32mIntermediate result: 0.029434511438012123  (Index 2)[0m
+Epoch: 3 | cost time: 72.57526135444641 | valid_loss: 0.029434511438012123 | valid_loss_true: 1.6395402631441889
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-2.pth
+Adjusting learning rate of group 0 to 6.1413e-05.
+	iters: 382, epoch: 4 | train_loss : 0.0032
+	speed: 0.150151s/iter; left time: 13428.862634s
+	iters: 764, epoch: 4 | train_loss : 0.0133
+	speed: 0.012920s/iter; left time: 1150.580140s
+	iters: 1146, epoch: 4 | train_loss : 0.0025
+	speed: 0.013100s/iter; left time: 1161.615648s
+	iters: 1528, epoch: 4 | train_loss : 0.0010
+	speed: 0.012471s/iter; left time: 1101.029042s
+	iters: 1910, epoch: 4 | train_loss : 0.0032
+	speed: 0.012495s/iter; left time: 1098.374551s
+[2024-03-01 14:00:51] [32mIntermediate result: 0.028592165559530258  (Index 3)[0m
+Epoch: 4 | cost time: 71.6356086730957 | valid_loss: 0.028592165559530258 | valid_loss_true: 1.64047161684554
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-3.pth
+Adjusting learning rate of group 0 to 5.2201e-05.
+	iters: 382, epoch: 5 | train_loss : 0.0012
+	speed: 0.136733s/iter; left time: 11967.539399s
+	iters: 764, epoch: 5 | train_loss : 0.0008
+	speed: 0.011580s/iter; left time: 1009.137347s
+	iters: 1146, epoch: 5 | train_loss : 0.0012
+	speed: 0.011942s/iter; left time: 1036.100429s
+	iters: 1528, epoch: 5 | train_loss : 0.0025
+	speed: 0.010125s/iter; left time: 874.583100s
+	iters: 1910, epoch: 5 | train_loss : 0.0028
+	speed: 0.010575s/iter; left time: 909.454121s
+[2024-03-01 14:02:02] [32mIntermediate result: 0.02834307588636875  (Index 4)[0m
+Epoch: 5 | cost time: 71.32787084579468 | valid_loss: 0.02834307588636875 | valid_loss_true: 1.6094204271690729
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-4.pth
+Adjusting learning rate of group 0 to 4.4371e-05.
+	iters: 382, epoch: 6 | train_loss : 0.0015
+	speed: 0.143151s/iter; left time: 12255.691928s
+	iters: 764, epoch: 6 | train_loss : 0.0066
+	speed: 0.013468s/iter; left time: 1147.874544s
+	iters: 1146, epoch: 6 | train_loss : 0.0026
+	speed: 0.014663s/iter; left time: 1244.155847s
+	iters: 1528, epoch: 6 | train_loss : 0.0005
+	speed: 0.014138s/iter; left time: 1194.201798s
+	iters: 1910, epoch: 6 | train_loss : 0.0187
+	speed: 0.013851s/iter; left time: 1164.638639s
+[2024-03-01 14:03:24] [32mIntermediate result: 0.028651464730501175  (Index 5)[0m
+Epoch: 6 | cost time: 81.75788521766663 | valid_loss: 0.028651464730501175 | valid_loss_true: 1.648772163850241
+Adjusting learning rate of group 0 to 3.7715e-05.
+	iters: 382, epoch: 7 | train_loss : 0.0008
+	speed: 0.161153s/iter; left time: 13488.957540s
+	iters: 764, epoch: 7 | train_loss : 0.0021
+	speed: 0.015998s/iter; left time: 1332.932508s
+	iters: 1146, epoch: 7 | train_loss : 0.0010
+	speed: 0.015365s/iter; left time: 1274.396107s
+	iters: 1528, epoch: 7 | train_loss : 0.0019
+	speed: 0.014264s/iter; left time: 1177.606601s
+	iters: 1910, epoch: 7 | train_loss : 0.0007
+	speed: 0.013053s/iter; left time: 1072.609322s
+[2024-03-01 14:04:50] [32mIntermediate result: 0.028537869453430176  (Index 6)[0m
+Epoch: 7 | cost time: 85.85347628593445 | valid_loss: 0.028537869453430176 | valid_loss_true: 1.6278217071006083
+Adjusting learning rate of group 0 to 3.2058e-05.
+	iters: 382, epoch: 8 | train_loss : 0.0009
+	speed: 0.162730s/iter; left time: 13310.025517s
+	iters: 764, epoch: 8 | train_loss : 0.0040
+	speed: 0.012373s/iter; left time: 1007.302335s
+	iters: 1146, epoch: 8 | train_loss : 0.0010
+	speed: 0.010645s/iter; left time: 862.537808s
+	iters: 1528, epoch: 8 | train_loss : 0.0034
+	speed: 0.009213s/iter; left time: 743.022458s
+	iters: 1910, epoch: 8 | train_loss : 0.0008
+	speed: 0.009602s/iter; left time: 770.705795s
+[2024-03-01 14:06:07] [32mIntermediate result: 0.030117329210042953  (Index 7)[0m
+Epoch: 8 | cost time: 76.60211634635925 | valid_loss: 0.030117329210042953 | valid_loss_true: 1.7542863981613102
+Adjusting learning rate of group 0 to 2.7249e-05.
+	iters: 382, epoch: 9 | train_loss : 0.0019
+	speed: 0.161787s/iter; left time: 12923.700966s
+	iters: 764, epoch: 9 | train_loss : 0.0005
+	speed: 0.014937s/iter; left time: 1187.462779s
+	iters: 1146, epoch: 9 | train_loss : 0.0012
+	speed: 0.017304s/iter; left time: 1369.004357s
+	iters: 1528, epoch: 9 | train_loss : 0.0356
+	speed: 0.015354s/iter; left time: 1208.913295s
+	iters: 1910, epoch: 9 | train_loss : 0.0006
+	speed: 0.014433s/iter; left time: 1130.842890s
+[2024-03-01 14:07:33] [32mIntermediate result: 0.028215335682034492  (Index 8)[0m
+Epoch: 9 | cost time: 86.67568802833557 | valid_loss: 0.028215335682034492 | valid_loss_true: 1.590749969745402
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-8.pth
+Adjusting learning rate of group 0 to 2.3162e-05.
+	iters: 382, epoch: 10 | train_loss : 0.0267
+	speed: 0.160190s/iter; left time: 12489.994831s
+	iters: 764, epoch: 10 | train_loss : 0.0011
+	speed: 0.009978s/iter; left time: 774.151788s
+	iters: 1146, epoch: 10 | train_loss : 0.0008
+	speed: 0.009215s/iter; left time: 711.451202s
+	iters: 1528, epoch: 10 | train_loss : 0.0005
+	speed: 0.008513s/iter; left time: 654.037570s
+	iters: 1910, epoch: 10 | train_loss : 0.0026
+	speed: 0.008604s/iter; left time: 657.674077s
+[2024-03-01 14:08:42] [32mIntermediate result: 0.02841551974415779  (Index 9)[0m
+Epoch: 10 | cost time: 68.49066042900085 | valid_loss: 0.02841551974415779 | valid_loss_true: 1.598878408885914
+Adjusting learning rate of group 0 to 1.9687e-05.
+	iters: 382, epoch: 11 | train_loss : 0.0126
+	speed: 0.142373s/iter; left time: 10828.742084s
+	iters: 764, epoch: 11 | train_loss : 0.0195
+	speed: 0.011047s/iter; left time: 836.012701s
+	iters: 1146, epoch: 11 | train_loss : 0.0042
+	speed: 0.011697s/iter; left time: 880.753265s
+	iters: 1528, epoch: 11 | train_loss : 0.0039
+	speed: 0.010985s/iter; left time: 822.918087s
+	iters: 1910, epoch: 11 | train_loss : 0.0015
+	speed: 0.010855s/iter; left time: 809.053686s
+[2024-03-01 14:09:51] [32mIntermediate result: 0.02862706035375595  (Index 10)[0m
+Epoch: 11 | cost time: 69.06637287139893 | valid_loss: 0.02862706035375595 | valid_loss_true: 1.6080935731353758
+Adjusting learning rate of group 0 to 1.6734e-05.
+	iters: 382, epoch: 12 | train_loss : 0.0009
+	speed: 0.135801s/iter; left time: 10069.386579s
+	iters: 764, epoch: 12 | train_loss : 0.0009
+	speed: 0.010428s/iter; left time: 769.267703s
+	iters: 1146, epoch: 12 | train_loss : 0.0004
+	speed: 0.010193s/iter; left time: 748.018568s
+	iters: 1528, epoch: 12 | train_loss : 0.0027
+	speed: 0.009336s/iter; left time: 681.528335s
+	iters: 1910, epoch: 12 | train_loss : 0.0004
+	speed: 0.010414s/iter; left time: 756.261187s
+[2024-03-01 14:10:58] [32mIntermediate result: 0.028433525934815407  (Index 11)[0m
+Epoch: 12 | cost time: 67.03342342376709 | valid_loss: 0.028433525934815407 | valid_loss_true: 1.6160047403914926
+Adjusting learning rate of group 0 to 1.4224e-05.
+	iters: 382, epoch: 13 | train_loss : 0.0046
+	speed: 0.135240s/iter; left time: 9769.296395s
+	iters: 764, epoch: 13 | train_loss : 0.0044
+	speed: 0.010098s/iter; left time: 725.583213s
+	iters: 1146, epoch: 13 | train_loss : 0.0012
+	speed: 0.011737s/iter; left time: 838.872954s
+	iters: 1528, epoch: 13 | train_loss : 0.0012
+	speed: 0.012521s/iter; left time: 890.130309s
+	iters: 1910, epoch: 13 | train_loss : 0.0014
+	speed: 0.010280s/iter; left time: 726.891475s
+[2024-03-01 14:12:08] [32mIntermediate result: 0.028543518856167793  (Index 12)[0m
+Epoch: 13 | cost time: 70.1502377986908 | valid_loss: 0.028543518856167793 | valid_loss_true: 1.6347137738304092
+Adjusting learning rate of group 0 to 1.2091e-05.
+	iters: 382, epoch: 14 | train_loss : 0.0022
+	speed: 0.138290s/iter; left time: 9725.353849s
+	iters: 764, epoch: 14 | train_loss : 0.0008
+	speed: 0.009748s/iter; left time: 681.806743s
+	iters: 1146, epoch: 14 | train_loss : 0.0202
+	speed: 0.010884s/iter; left time: 757.127595s
+	iters: 1528, epoch: 14 | train_loss : 0.0009
+	speed: 0.012029s/iter; left time: 832.148602s
+	iters: 1910, epoch: 14 | train_loss : 0.0006
+	speed: 0.010795s/iter; left time: 742.707367s
+[2024-03-01 14:13:18] [32mIntermediate result: 0.028392761945724487  (Index 13)[0m
+Epoch: 14 | cost time: 70.29322934150696 | valid_loss: 0.028392761945724487 | valid_loss_true: 1.6145015624061676
+Adjusting learning rate of group 0 to 1.0277e-05.
+	iters: 382, epoch: 15 | train_loss : 0.0015
+	speed: 0.141365s/iter; left time: 9671.478667s
+	iters: 764, epoch: 15 | train_loss : 0.0151
+	speed: 0.010766s/iter; left time: 732.414576s
+	iters: 1146, epoch: 15 | train_loss : 0.0073
+	speed: 0.010389s/iter; left time: 702.818535s
+	iters: 1528, epoch: 15 | train_loss : 0.0161
+	speed: 0.011160s/iter; left time: 750.721777s
+	iters: 1910, epoch: 15 | train_loss : 0.0016
+	speed: 0.010858s/iter; left time: 726.270752s
+[2024-03-01 14:14:28] [32mIntermediate result: 0.028419120237231255  (Index 14)[0m
+Epoch: 15 | cost time: 69.55810976028442 | valid_loss: 0.028419120237231255 | valid_loss_true: 1.6053971391917659
+Adjusting learning rate of group 0 to 8.7354e-06.
+	iters: 382, epoch: 16 | train_loss : 0.0009
+	speed: 0.140028s/iter; left time: 9312.396867s
+	iters: 764, epoch: 16 | train_loss : 0.0011
+	speed: 0.010936s/iter; left time: 723.095002s
+	iters: 1146, epoch: 16 | train_loss : 0.0007
+	speed: 0.011985s/iter; left time: 787.907843s
+	iters: 1528, epoch: 16 | train_loss : 0.0165
+	speed: 0.010339s/iter; left time: 675.764172s
+	iters: 1910, epoch: 16 | train_loss : 0.0051
+	speed: 0.011010s/iter; left time: 715.404956s
+[2024-03-01 14:15:41] [32mIntermediate result: 0.028495745733380318  (Index 15)[0m
+Epoch: 16 | cost time: 72.67816472053528 | valid_loss: 0.028495745733380318 | valid_loss_true: 1.607928557711455
+Adjusting learning rate of group 0 to 7.4251e-06.
+	iters: 382, epoch: 17 | train_loss : 0.0011
+	speed: 0.143356s/iter; left time: 9259.805473s
+	iters: 764, epoch: 17 | train_loss : 0.0052
+	speed: 0.009258s/iter; left time: 594.465399s
+	iters: 1146, epoch: 17 | train_loss : 0.0009
+	speed: 0.010256s/iter; left time: 654.634142s
+	iters: 1528, epoch: 17 | train_loss : 0.0007
+	speed: 0.011271s/iter; left time: 715.094420s
+	iters: 1910, epoch: 17 | train_loss : 0.0014
+	speed: 0.013869s/iter; left time: 874.673895s
+[2024-03-01 14:16:57] [32mIntermediate result: 0.028450982645154  (Index 16)[0m
+Epoch: 17 | cost time: 76.15052199363708 | valid_loss: 0.028450982645154 | valid_loss_true: 1.6155567618600726
+Early stop with best valid_loss: 0.028450982645154
+[2024-03-01 14:16:57] [32mFinal result: 0.028215335682034492[0m
+>>>>>>>end of training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+python -u main_nni.py --stage train_only --model_id alumina_lstm --model_name alumina_lstm --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效蒸发器汽室压力 --target_cols 1效蒸发器汽室压力 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_lstm_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_lstm/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_lstm/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_lstm_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效蒸发器汽室压力', target_cols='1效蒸发器汽室压力', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_lstm', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+	iters: 382, epoch: 1 | train_loss : 0.0091
+	speed: 0.020907s/iter; left time: 1989.657783s
+	iters: 764, epoch: 1 | train_loss : 0.0099
+	speed: 0.015446s/iter; left time: 1464.050843s
+	iters: 1146, epoch: 1 | train_loss : 0.0090
+	speed: 0.014670s/iter; left time: 1384.942800s
+	iters: 1528, epoch: 1 | train_loss : 0.0066
+	speed: 0.015086s/iter; left time: 1418.433959s
+	iters: 1910, epoch: 1 | train_loss : 0.0097
+	speed: 0.015420s/iter; left time: 1443.967127s
+[2024-03-01 14:18:27] [32mIntermediate result: 0.10832197219133377  (Index 0)[0m
+Epoch: 1 | cost time: 81.27306365966797 | valid_loss: 0.10832197219133377 | valid_loss_true: 0.024929186888784403
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-0.pth
+Adjusting learning rate of group 0 to 8.5000e-05.
+	iters: 382, epoch: 2 | train_loss : 0.0080
+	speed: 0.147951s/iter; left time: 13797.580368s
+	iters: 764, epoch: 2 | train_loss : 0.0150
+	speed: 0.012836s/iter; left time: 1192.165848s
+	iters: 1146, epoch: 2 | train_loss : 0.0115
+	speed: 0.009575s/iter; left time: 885.628778s
+	iters: 1528, epoch: 2 | train_loss : 0.0050
+	speed: 0.009742s/iter; left time: 897.394976s
+	iters: 1910, epoch: 2 | train_loss : 0.0088
+	speed: 0.010594s/iter; left time: 971.788169s
+[2024-03-01 14:19:41] [32mIntermediate result: 0.10970629751682281  (Index 1)[0m
+Epoch: 2 | cost time: 73.97506189346313 | valid_loss: 0.10970629751682281 | valid_loss_true: 0.0264972075765349
+Adjusting learning rate of group 0 to 7.2250e-05.
+	iters: 382, epoch: 3 | train_loss : 0.0105
+	speed: 0.153871s/iter; left time: 14055.664454s
+	iters: 764, epoch: 3 | train_loss : 0.0103
+	speed: 0.013975s/iter; left time: 1271.206796s
+	iters: 1146, epoch: 3 | train_loss : 0.0567
+	speed: 0.015531s/iter; left time: 1406.819023s
+	iters: 1528, epoch: 3 | train_loss : 0.0521
+	speed: 0.016375s/iter; left time: 1477.043171s
+	iters: 1910, epoch: 3 | train_loss : 0.0098
+	speed: 0.016310s/iter; left time: 1464.925661s
+[2024-03-01 14:21:08] [32mIntermediate result: 0.10948877781629562  (Index 2)[0m
+Epoch: 3 | cost time: 87.80783891677856 | valid_loss: 0.10948877781629562 | valid_loss_true: 0.026157192912544022
+Adjusting learning rate of group 0 to 6.1413e-05.
+	iters: 382, epoch: 4 | train_loss : 0.0109
+	speed: 0.166856s/iter; left time: 14922.888610s
+	iters: 764, epoch: 4 | train_loss : 0.0440
+	speed: 0.015085s/iter; left time: 1343.348966s
+	iters: 1146, epoch: 4 | train_loss : 0.0051
+	speed: 0.015873s/iter; left time: 1407.446571s
+	iters: 1528, epoch: 4 | train_loss : 0.0177
+	speed: 0.012890s/iter; left time: 1138.052975s
+	iters: 1910, epoch: 4 | train_loss : 0.0131
+	speed: 0.010134s/iter; left time: 890.819493s
+[2024-03-01 14:22:25] [32mIntermediate result: 0.10641063004732132  (Index 3)[0m
+Epoch: 4 | cost time: 77.07987761497498 | valid_loss: 0.10641063004732132 | valid_loss_true: 0.0247676527159051
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-3.pth
+Adjusting learning rate of group 0 to 5.2201e-05.
+	iters: 382, epoch: 5 | train_loss : 0.0098
+	speed: 0.144437s/iter; left time: 12641.853922s
+	iters: 764, epoch: 5 | train_loss : 0.0062
+	speed: 0.012372s/iter; left time: 1078.170131s
+	iters: 1146, epoch: 5 | train_loss : 0.0109
+	speed: 0.011653s/iter; left time: 1011.065800s
+	iters: 1528, epoch: 5 | train_loss : 0.0065
+	speed: 0.011550s/iter; left time: 997.710947s
+	iters: 1910, epoch: 5 | train_loss : 0.0194
+	speed: 0.015342s/iter; left time: 1319.371633s
+[2024-03-01 14:23:45] [32mIntermediate result: 0.10690253973007202  (Index 4)[0m
+Epoch: 5 | cost time: 79.54149317741394 | valid_loss: 0.10690253973007202 | valid_loss_true: 0.025179713873393714
+Adjusting learning rate of group 0 to 4.4371e-05.
+	iters: 382, epoch: 6 | train_loss : 0.0117
+	speed: 0.157269s/iter; left time: 13464.427184s
+	iters: 764, epoch: 6 | train_loss : 0.0141
+	speed: 0.011623s/iter; left time: 990.657758s
+	iters: 1146, epoch: 6 | train_loss : 0.0145
+	speed: 0.011308s/iter; left time: 959.454809s
+	iters: 1528, epoch: 6 | train_loss : 0.0067
+	speed: 0.011243s/iter; left time: 949.674943s
+	iters: 1910, epoch: 6 | train_loss : 0.0052
+	speed: 0.011263s/iter; left time: 947.086000s
+[2024-03-01 14:25:02] [32mIntermediate result: 0.10882502794265747  (Index 5)[0m
+Epoch: 6 | cost time: 77.39388060569763 | valid_loss: 0.10882502794265747 | valid_loss_true: 0.025886244820678563
+Adjusting learning rate of group 0 to 3.7715e-05.
+	iters: 382, epoch: 7 | train_loss : 0.0067
+	speed: 0.158714s/iter; left time: 13284.870267s
+	iters: 764, epoch: 7 | train_loss : 0.0079
+	speed: 0.012596s/iter; left time: 1049.492589s
+	iters: 1146, epoch: 7 | train_loss : 0.0068
+	speed: 0.011400s/iter; left time: 945.546061s
+	iters: 1528, epoch: 7 | train_loss : 0.0200
+	speed: 0.011515s/iter; left time: 950.643194s
+	iters: 1910, epoch: 7 | train_loss : 0.0070
+	speed: 0.011514s/iter; left time: 946.169535s
+[2024-03-01 14:26:29] [32mIntermediate result: 0.10628803074359894  (Index 6)[0m
+Epoch: 7 | cost time: 86.36937665939331 | valid_loss: 0.10628803074359894 | valid_loss_true: 0.024845438340165157
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-6.pth
+Adjusting learning rate of group 0 to 3.2058e-05.
+	iters: 382, epoch: 8 | train_loss : 0.0088
+	speed: 0.179285s/iter; left time: 14664.075974s
+	iters: 764, epoch: 8 | train_loss : 0.0052
+	speed: 0.011868s/iter; left time: 966.136689s
+	iters: 1146, epoch: 8 | train_loss : 0.0137
+	speed: 0.011634s/iter; left time: 942.681699s
+	iters: 1528, epoch: 8 | train_loss : 0.0095
+	speed: 0.012127s/iter; left time: 977.993035s
+	iters: 1910, epoch: 8 | train_loss : 0.0053
+	speed: 0.011487s/iter; left time: 922.010274s
+[2024-03-01 14:27:53] [32mIntermediate result: 0.1062484160065651  (Index 7)[0m
+Epoch: 8 | cost time: 84.52330875396729 | valid_loss: 0.1062484160065651 | valid_loss_true: 0.02488638189723691
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-7.pth
+Adjusting learning rate of group 0 to 2.7249e-05.
+	iters: 382, epoch: 9 | train_loss : 0.0082
+	speed: 0.172845s/iter; left time: 13807.063034s
+	iters: 764, epoch: 9 | train_loss : 0.0071
+	speed: 0.010517s/iter; left time: 836.120151s
+	iters: 1146, epoch: 9 | train_loss : 0.0058
+	speed: 0.010870s/iter; left time: 859.989975s
+	iters: 1528, epoch: 9 | train_loss : 0.0258
+	speed: 0.010787s/iter; left time: 849.330678s
+	iters: 1910, epoch: 9 | train_loss : 0.0078
+	speed: 0.010898s/iter; left time: 853.867298s
+[2024-03-01 14:29:07] [32mIntermediate result: 0.10899970680475235  (Index 8)[0m
+Epoch: 9 | cost time: 73.8153293132782 | valid_loss: 0.10899970680475235 | valid_loss_true: 0.026019255093586945
+Adjusting learning rate of group 0 to 2.3162e-05.
+	iters: 382, epoch: 10 | train_loss : 0.0127
+	speed: 0.151461s/iter; left time: 11809.404406s
+	iters: 764, epoch: 10 | train_loss : 0.0045
+	speed: 0.012421s/iter; left time: 963.698374s
+	iters: 1146, epoch: 10 | train_loss : 0.0094
+	speed: 0.011655s/iter; left time: 899.831005s
+	iters: 1528, epoch: 10 | train_loss : 0.0069
+	speed: 0.012880s/iter; left time: 989.455156s
+	iters: 1910, epoch: 10 | train_loss : 0.0062
+	speed: 0.013113s/iter; left time: 1002.392964s
+[2024-03-01 14:30:35] [32mIntermediate result: 0.10562266409397125  (Index 9)[0m
+Epoch: 10 | cost time: 88.30939888954163 | valid_loss: 0.10562266409397125 | valid_loss_true: 0.024635535286427306
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-9.pth
+Adjusting learning rate of group 0 to 1.9687e-05.
+	iters: 382, epoch: 11 | train_loss : 0.0366
+	speed: 0.179260s/iter; left time: 13634.307469s
+	iters: 764, epoch: 11 | train_loss : 0.0461
+	speed: 0.010922s/iter; left time: 826.510096s
+	iters: 1146, epoch: 11 | train_loss : 0.0106
+	speed: 0.011840s/iter; left time: 891.525711s
+	iters: 1528, epoch: 11 | train_loss : 0.0145
+	speed: 0.012236s/iter; left time: 916.641666s
+	iters: 1910, epoch: 11 | train_loss : 0.0091
+	speed: 0.012415s/iter; left time: 925.306759s
+[2024-03-01 14:31:59] [32mIntermediate result: 0.10641757398843765  (Index 10)[0m
+Epoch: 11 | cost time: 83.86663794517517 | valid_loss: 0.10641757398843765 | valid_loss_true: 0.02487236378664806
+Adjusting learning rate of group 0 to 1.6734e-05.
+	iters: 382, epoch: 12 | train_loss : 0.0128
+	speed: 0.174523s/iter; left time: 12940.556325s
+	iters: 764, epoch: 12 | train_loss : 0.0111
+	speed: 0.012619s/iter; left time: 930.847893s
+	iters: 1146, epoch: 12 | train_loss : 0.0058
+	speed: 0.012200s/iter; left time: 895.287486s
+	iters: 1528, epoch: 12 | train_loss : 0.0122
+	speed: 0.011496s/iter; left time: 839.196110s
+	iters: 1910, epoch: 12 | train_loss : 0.0049
+	speed: 0.010662s/iter; left time: 774.264031s
+[2024-03-01 14:33:15] [32mIntermediate result: 0.10636062920093536  (Index 11)[0m
+Epoch: 12 | cost time: 75.86938071250916 | valid_loss: 0.10636062920093536 | valid_loss_true: 0.02486439463591984
+Adjusting learning rate of group 0 to 1.4224e-05.
+	iters: 382, epoch: 13 | train_loss : 0.0062
+	speed: 0.151509s/iter; left time: 10944.548942s
+	iters: 764, epoch: 13 | train_loss : 0.0072
+	speed: 0.013913s/iter; left time: 999.736272s
+	iters: 1146, epoch: 13 | train_loss : 0.0084
+	speed: 0.015272s/iter; left time: 1091.569564s
+	iters: 1528, epoch: 13 | train_loss : 0.0075
+	speed: 0.013246s/iter; left time: 941.667668s
+	iters: 1910, epoch: 13 | train_loss : 0.0101
+	speed: 0.013019s/iter; left time: 920.560254s
+[2024-03-01 14:34:46] [32mIntermediate result: 0.10706417262554169  (Index 12)[0m
+Epoch: 13 | cost time: 90.41999197006226 | valid_loss: 0.10706417262554169 | valid_loss_true: 0.02528327268190045
+Adjusting learning rate of group 0 to 1.2091e-05.
+	iters: 382, epoch: 14 | train_loss : 0.0180
+	speed: 0.180238s/iter; left time: 12675.449086s
+	iters: 764, epoch: 14 | train_loss : 0.0075
+	speed: 0.011170s/iter; left time: 781.258131s
+	iters: 1146, epoch: 14 | train_loss : 0.0125
+	speed: 0.010334s/iter; left time: 718.827392s
+	iters: 1528, epoch: 14 | train_loss : 0.0099
+	speed: 0.010415s/iter; left time: 720.532615s
+	iters: 1910, epoch: 14 | train_loss : 0.0080
+	speed: 0.011231s/iter; left time: 772.693904s
+[2024-03-01 14:36:12] [32mIntermediate result: 0.10633457452058792  (Index 13)[0m
+Epoch: 14 | cost time: 86.35606646537781 | valid_loss: 0.10633457452058792 | valid_loss_true: 0.02491976540814334
+Adjusting learning rate of group 0 to 1.0277e-05.
+	iters: 382, epoch: 15 | train_loss : 0.0074
+	speed: 0.184955s/iter; left time: 12653.685881s
+	iters: 764, epoch: 15 | train_loss : 0.0587
+	speed: 0.012119s/iter; left time: 824.522533s
+	iters: 1146, epoch: 15 | train_loss : 0.0201
+	speed: 0.012975s/iter; left time: 877.761167s
+	iters: 1528, epoch: 15 | train_loss : 0.0063
+	speed: 0.012815s/iter; left time: 862.056677s
+	iters: 1910, epoch: 15 | train_loss : 0.0085
+	speed: 0.012813s/iter; left time: 856.991247s
+[2024-03-01 14:37:33] [32mIntermediate result: 0.10643192380666733  (Index 14)[0m
+Epoch: 15 | cost time: 81.33151030540466 | valid_loss: 0.10643192380666733 | valid_loss_true: 0.024887505245374093
+Adjusting learning rate of group 0 to 8.7354e-06.
+	iters: 382, epoch: 16 | train_loss : 0.0077
+	speed: 0.158787s/iter; left time: 10560.002251s
+	iters: 764, epoch: 16 | train_loss : 0.0061
+	speed: 0.011092s/iter; left time: 733.426255s
+	iters: 1146, epoch: 16 | train_loss : 0.0091
+	speed: 0.012893s/iter; left time: 847.575165s
+	iters: 1528, epoch: 16 | train_loss : 0.0100
+	speed: 0.013161s/iter; left time: 860.195657s
+	iters: 1910, epoch: 16 | train_loss : 0.0200
+	speed: 0.013785s/iter; left time: 895.698231s
+[2024-03-01 14:38:54] [32mIntermediate result: 0.10640949755907059  (Index 15)[0m
+Epoch: 16 | cost time: 81.18525981903076 | valid_loss: 0.10640949755907059 | valid_loss_true: 0.02481974929020637
+Adjusting learning rate of group 0 to 7.4251e-06.
+	iters: 382, epoch: 17 | train_loss : 0.0128
+	speed: 0.165762s/iter; left time: 10707.095307s
+	iters: 764, epoch: 17 | train_loss : 0.0110
+	speed: 0.013998s/iter; left time: 898.802400s
+	iters: 1146, epoch: 17 | train_loss : 0.0066
+	speed: 0.012432s/iter; left time: 793.523986s
+	iters: 1528, epoch: 17 | train_loss : 0.0084
+	speed: 0.011315s/iter; left time: 717.919238s
+	iters: 1910, epoch: 17 | train_loss : 0.0164
+	speed: 0.010636s/iter; left time: 670.779263s
+[2024-03-01 14:40:18] [32mIntermediate result: 0.10591483861207962  (Index 16)[0m
+Epoch: 17 | cost time: 83.43357276916504 | valid_loss: 0.10591483861207962 | valid_loss_true: 0.024719580902161017
+Adjusting learning rate of group 0 to 6.3113e-06.
+	iters: 382, epoch: 18 | train_loss : 0.0063
+	speed: 0.168265s/iter; left time: 10547.178127s
+	iters: 764, epoch: 18 | train_loss : 0.0230
+	speed: 0.012599s/iter; left time: 784.942010s
+	iters: 1146, epoch: 18 | train_loss : 0.0088
+	speed: 0.012165s/iter; left time: 753.242846s
+	iters: 1528, epoch: 18 | train_loss : 0.0073
+	speed: 0.012563s/iter; left time: 773.052083s
+	iters: 1910, epoch: 18 | train_loss : 0.0054
+	speed: 0.012687s/iter; left time: 775.854481s
+[2024-03-01 14:41:41] [32mIntermediate result: 0.10604381561279297  (Index 17)[0m
+Epoch: 18 | cost time: 83.0539972782135 | valid_loss: 0.10604381561279297 | valid_loss_true: 0.02476181042685027
+Early stop with best valid_loss: 0.10604381561279297
+[2024-03-01 14:41:41] [32mFinal result: 0.10562266409397125[0m
+>>>>>>>end of training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+python -u main_nni.py --stage train_only --model_id alumina_lstm --model_name alumina_lstm --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效原液换热前温度 --target_cols 1效原液换热前温度 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_lstm_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_lstm/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_lstm/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_lstm_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效原液换热前温度', target_cols='1效原液换热前温度', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_lstm', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+	iters: 382, epoch: 1 | train_loss : 0.0627
+	speed: 0.016349s/iter; left time: 1555.916539s
+	iters: 764, epoch: 1 | train_loss : 0.0023
+	speed: 0.010297s/iter; left time: 975.988500s
+	iters: 1146, epoch: 1 | train_loss : 0.0022
+	speed: 0.010754s/iter; left time: 1015.262288s
+	iters: 1528, epoch: 1 | train_loss : 0.0016
+	speed: 0.010698s/iter; left time: 1005.902669s
+	iters: 1910, epoch: 1 | train_loss : 0.0006
+	speed: 0.010759s/iter; left time: 1007.495126s
+[2024-03-01 14:43:12] [32mIntermediate result: 0.02372710406780243  (Index 0)[0m
+Epoch: 1 | cost time: 82.38717675209045 | valid_loss: 0.02372710406780243 | valid_loss_true: 1.1306808142414875
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-0.pth
+Adjusting learning rate of group 0 to 8.5000e-05.
+	iters: 382, epoch: 2 | train_loss : 0.0022
+	speed: 0.174936s/iter; left time: 16314.157795s
+	iters: 764, epoch: 2 | train_loss : 0.0013
+	speed: 0.012044s/iter; left time: 1118.630809s
+	iters: 1146, epoch: 2 | train_loss : 0.0344
+	speed: 0.012288s/iter; left time: 1136.546524s
+	iters: 1528, epoch: 2 | train_loss : 0.0020
+	speed: 0.012299s/iter; left time: 1132.867519s
+	iters: 1910, epoch: 2 | train_loss : 0.0014
+	speed: 0.012701s/iter; left time: 1165.027941s
+[2024-03-01 14:44:38] [32mIntermediate result: 0.027064522728323936  (Index 1)[0m
+Epoch: 2 | cost time: 85.77193284034729 | valid_loss: 0.027064522728323936 | valid_loss_true: 1.3752696741151589
+Adjusting learning rate of group 0 to 7.2250e-05.
+	iters: 382, epoch: 3 | train_loss : 0.0013
+	speed: 0.174005s/iter; left time: 15894.815499s
+	iters: 764, epoch: 3 | train_loss : 0.0018
+	speed: 0.013662s/iter; left time: 1242.738734s
+	iters: 1146, epoch: 3 | train_loss : 0.0028
+	speed: 0.013439s/iter; left time: 1217.374050s
+	iters: 1528, epoch: 3 | train_loss : 0.0636
+	speed: 0.014411s/iter; left time: 1299.902830s
+	iters: 1910, epoch: 3 | train_loss : 0.0006
+	speed: 0.013800s/iter; left time: 1239.508873s
+[2024-03-01 14:46:09] [32mIntermediate result: 0.023088406771421432  (Index 2)[0m
+Epoch: 3 | cost time: 90.45324802398682 | valid_loss: 0.023088406771421432 | valid_loss_true: 1.0728704510826388
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-2.pth
+Adjusting learning rate of group 0 to 6.1413e-05.
+	iters: 382, epoch: 4 | train_loss : 0.0012
+	speed: 0.181010s/iter; left time: 16188.785888s
+	iters: 764, epoch: 4 | train_loss : 0.0049
+	speed: 0.010865s/iter; left time: 967.534573s
+	iters: 1146, epoch: 4 | train_loss : 0.0036
+	speed: 0.010658s/iter; left time: 945.047650s
+	iters: 1528, epoch: 4 | train_loss : 0.0020
+	speed: 0.010676s/iter; left time: 942.552311s
+	iters: 1910, epoch: 4 | train_loss : 0.0012
+	speed: 0.009998s/iter; left time: 878.904961s
+[2024-03-01 14:47:31] [32mIntermediate result: 0.023320447653532028  (Index 3)[0m
+Epoch: 4 | cost time: 82.16081142425537 | valid_loss: 0.023320447653532028 | valid_loss_true: 1.0882068370487965
+Adjusting learning rate of group 0 to 5.2201e-05.
+	iters: 382, epoch: 5 | train_loss : 0.0013
+	speed: 0.173162s/iter; left time: 15155.992991s
+	iters: 764, epoch: 5 | train_loss : 0.0005
+	speed: 0.012254s/iter; left time: 1067.871780s
+	iters: 1146, epoch: 5 | train_loss : 0.0026
+	speed: 0.011525s/iter; left time: 999.912669s
+	iters: 1528, epoch: 5 | train_loss : 0.0053
+	speed: 0.012378s/iter; left time: 1069.220166s
+	iters: 1910, epoch: 5 | train_loss : 0.0069
+	speed: 0.013563s/iter; left time: 1166.372757s
+[2024-03-01 14:48:57] [32mIntermediate result: 0.023646580055356026  (Index 4)[0m
+Epoch: 5 | cost time: 85.96068286895752 | valid_loss: 0.023646580055356026 | valid_loss_true: 1.1261329987883553
+Adjusting learning rate of group 0 to 4.4371e-05.
+	iters: 382, epoch: 6 | train_loss : 0.0017
+	speed: 0.176737s/iter; left time: 15131.199793s
+	iters: 764, epoch: 6 | train_loss : 0.0044
+	speed: 0.013933s/iter; left time: 1187.569332s
+	iters: 1146, epoch: 6 | train_loss : 0.0036
+	speed: 0.013301s/iter; left time: 1128.551449s
+	iters: 1528, epoch: 6 | train_loss : 0.0005
+	speed: 0.014030s/iter; left time: 1185.090705s
+	iters: 1910, epoch: 6 | train_loss : 0.0354
+	speed: 0.016399s/iter; left time: 1378.946862s
+[2024-03-01 14:50:22] [32mIntermediate result: 0.023788200691342354  (Index 5)[0m
+Epoch: 6 | cost time: 85.57534122467041 | valid_loss: 0.023788200691342354 | valid_loss_true: 1.096558985010603
+Adjusting learning rate of group 0 to 3.7715e-05.
+	iters: 382, epoch: 7 | train_loss : 0.0009
+	speed: 0.164274s/iter; left time: 13750.196144s
+	iters: 764, epoch: 7 | train_loss : 0.0012
+	speed: 0.011282s/iter; left time: 939.988956s
+	iters: 1146, epoch: 7 | train_loss : 0.0005
+	speed: 0.010974s/iter; left time: 910.161219s
+	iters: 1528, epoch: 7 | train_loss : 0.0033
+	speed: 0.010817s/iter; left time: 893.013535s
+	iters: 1910, epoch: 7 | train_loss : 0.0005
+	speed: 0.011853s/iter; left time: 974.020758s
+[2024-03-01 14:51:52] [32mIntermediate result: 0.023698655888438225  (Index 6)[0m
+Epoch: 7 | cost time: 89.94074368476868 | valid_loss: 0.023698655888438225 | valid_loss_true: 1.116129501580475
+Adjusting learning rate of group 0 to 3.2058e-05.
+	iters: 382, epoch: 8 | train_loss : 0.0015
+	speed: 0.192623s/iter; left time: 15754.989368s
+	iters: 764, epoch: 8 | train_loss : 0.0011
+	speed: 0.013570s/iter; left time: 1104.695266s
+	iters: 1146, epoch: 8 | train_loss : 0.0006
+	speed: 0.012915s/iter; left time: 1046.475982s
+	iters: 1528, epoch: 8 | train_loss : 0.0014
+	speed: 0.014072s/iter; left time: 1134.889323s
+	iters: 1910, epoch: 8 | train_loss : 0.0011
+	speed: 0.014582s/iter; left time: 1170.375922s
+[2024-03-01 14:53:24] [32mIntermediate result: 0.024468744173645973  (Index 7)[0m
+Epoch: 8 | cost time: 91.98807835578918 | valid_loss: 0.024468744173645973 | valid_loss_true: 1.155615545992428
+Adjusting learning rate of group 0 to 2.7249e-05.
+	iters: 382, epoch: 9 | train_loss : 0.0037
+	speed: 0.185375s/iter; left time: 14807.925880s
+	iters: 764, epoch: 9 | train_loss : 0.0005
+	speed: 0.012701s/iter; left time: 1009.718553s
+	iters: 1146, epoch: 9 | train_loss : 0.0014
+	speed: 0.013496s/iter; left time: 1067.736079s
+	iters: 1528, epoch: 9 | train_loss : 0.0333
+	speed: 0.013783s/iter; left time: 1085.207888s
+	iters: 1910, epoch: 9 | train_loss : 0.0005
+	speed: 0.013769s/iter; left time: 1078.803774s
+[2024-03-01 14:54:53] [32mIntermediate result: 0.024251261726021767  (Index 8)[0m
+Epoch: 9 | cost time: 88.98698687553406 | valid_loss: 0.024251261726021767 | valid_loss_true: 1.122411245839421
+Adjusting learning rate of group 0 to 2.3162e-05.
+	iters: 382, epoch: 10 | train_loss : 0.0358
+	speed: 0.177493s/iter; left time: 13839.159471s
+	iters: 764, epoch: 10 | train_loss : 0.0007
+	speed: 0.010970s/iter; left time: 851.146428s
+	iters: 1146, epoch: 10 | train_loss : 0.0007
+	speed: 0.010738s/iter; left time: 829.038718s
+	iters: 1528, epoch: 10 | train_loss : 0.0007
+	speed: 0.011275s/iter; left time: 866.166240s
+	iters: 1910, epoch: 10 | train_loss : 0.0079
+	speed: 0.011592s/iter; left time: 886.105450s
+[2024-03-01 14:56:18] [32mIntermediate result: 0.023104114457964897  (Index 9)[0m
+Epoch: 10 | cost time: 85.09355592727661 | valid_loss: 0.023104114457964897 | valid_loss_true: 1.0622970637779294
+Adjusting learning rate of group 0 to 1.9687e-05.
+	iters: 382, epoch: 11 | train_loss : 0.0056
+	speed: 0.180593s/iter; left time: 13735.697165s
+	iters: 764, epoch: 11 | train_loss : 0.0127
+	speed: 0.012006s/iter; left time: 908.548500s
+	iters: 1146, epoch: 11 | train_loss : 0.0050
+	speed: 0.013275s/iter; left time: 999.544072s
+	iters: 1528, epoch: 11 | train_loss : 0.0036
+	speed: 0.013087s/iter; left time: 980.386751s
+	iters: 1910, epoch: 11 | train_loss : 0.0011
+	speed: 0.013603s/iter; left time: 1013.843201s
+[2024-03-01 14:57:50] [32mIntermediate result: 0.023558709770441055  (Index 10)[0m
+Epoch: 11 | cost time: 91.38986539840698 | valid_loss: 0.023558709770441055 | valid_loss_true: 1.0830323919210627
+Early stop with best valid_loss: 0.023558709770441055
+[2024-03-01 14:57:50] [32mFinal result: 0.023088406771421432[0m
+>>>>>>>end of training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+python -u main_nni.py --stage train_only --model_id alumina_lstm --model_name alumina_lstm --features MS --log_path log --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv --datetime_col dtime --feature_cols 1效出料温度 --target_cols 1效出料温度 --seq_len 30 --label_len 2 --pred_len 30 --timestamp_feature none --train_epochs 50 --gpu 0 --use_nni --checkpoints ./checkpoints/alumina_lstm_train_only --hidden_dim 128 --d_model 128 --e_layers 1 --d_layers 1
+model_id: alumina_lstm/STANDALONE
+Args in experiment:
+Namespace(use_nni=True, stage='train_only', model_id='alumina_lstm/STANDALONE', log_path='log', checkpoints='./checkpoints/alumina_lstm_train_only', key=None, task_name='Forecast', features='MS', embed='timeF', freq='h', trainset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv', validset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv', testset_csv_path='/workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv', datetime_col='dtime', feature_cols='1效出料温度', target_cols='1效出料温度', timestamp_feature='none', seq_len=30, label_len=2, pred_len=30, interval=900, model_name='alumina_lstm', d_model=128, n_heads=8, e_layers=1, d_layers=1, d_ff=512, hidden_dim=128, factor=1, dropout=0.05, activation='gelu', output_attention=False, optimizer='Adam', fix_seed=-1, num_workers=10, train_epochs=50, batch_size=64, patience=7, lr=0.0001, gpu=0, label_loss_rate=0.5, reg_loss_rate=0.5, use_norm=1, patch_len=16, target_num=1, use_gpu=True, hpo='nni')
+Performing MS Forecasting (TimeXer)
+Use GPU... cuda:0
+Adjusting learning rate of group 0 to 1.0000e-04.
+>>>>>>>start training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>
+	iters: 382, epoch: 1 | train_loss : 0.0000
+	speed: 0.018704s/iter; left time: 1780.075956s
+	iters: 764, epoch: 1 | train_loss : 0.0000
+	speed: 0.010732s/iter; left time: 1017.241936s
+	iters: 1146, epoch: 1 | train_loss : 0.0000
+	speed: 0.012812s/iter; left time: 1209.518361s
+	iters: 1528, epoch: 1 | train_loss : 0.0000
+	speed: 0.012864s/iter; left time: 1209.512507s
+	iters: 1910, epoch: 1 | train_loss : 0.0000
+	speed: 0.013753s/iter; left time: 1287.827874s
+[2024-03-01 14:59:30] [32mIntermediate result: 3.5989722313445327e-09  (Index 0)[0m
+Epoch: 1 | cost time: 90.04663705825806 | valid_loss: 3.5989722313445327e-09 | valid_loss_true: 0.0
+Chepoint Saved at:  ./checkpoints/alumina_lstm_train_only/alumina_lstm/STANDALONE/checkpoint-0.pth
+Adjusting learning rate of group 0 to 8.5000e-05.
+	iters: 382, epoch: 2 | train_loss : 0.0000
+	speed: 0.183492s/iter; left time: 17112.068608s
+	iters: 764, epoch: 2 | train_loss : 0.0000
+	speed: 0.010871s/iter; left time: 1009.653228s
+	iters: 1146, epoch: 2 | train_loss : 0.0000
+	speed: 0.010597s/iter; left time: 980.129645s
+	iters: 1528, epoch: 2 | train_loss : 0.0000
+	speed: 0.011615s/iter; left time: 1069.842405s
+	iters: 1910, epoch: 2 | train_loss : 0.0000
+	speed: 0.010636s/iter; left time: 975.606111s
+[2024-03-01 15:00:50] [32mIntermediate result: 3.847463236894555e-09  (Index 1)[0m
+Epoch: 2 | cost time: 80.4399778842926 | valid_loss: 3.847463236894555e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 7.2250e-05.
+	iters: 382, epoch: 3 | train_loss : 0.0000
+	speed: 0.169001s/iter; left time: 15437.759726s
+	iters: 764, epoch: 3 | train_loss : 0.0000
+	speed: 0.012426s/iter; left time: 1130.314852s
+	iters: 1146, epoch: 3 | train_loss : 0.0000
+	speed: 0.011838s/iter; left time: 1072.354841s
+	iters: 1528, epoch: 3 | train_loss : 0.0000
+	speed: 0.011703s/iter; left time: 1055.604177s
+	iters: 1910, epoch: 3 | train_loss : 0.0000
+	speed: 0.011449s/iter; left time: 1028.358807s
+[2024-03-01 15:02:18] [32mIntermediate result: 3.965874295630556e-09  (Index 2)[0m
+Epoch: 3 | cost time: 87.87439370155334 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 6.1413e-05.
+	iters: 382, epoch: 4 | train_loss : 0.0000
+	speed: 0.183169s/iter; left time: 16381.862254s
+	iters: 764, epoch: 4 | train_loss : 0.0000
+	speed: 0.010937s/iter; left time: 973.962183s
+	iters: 1146, epoch: 4 | train_loss : 0.0000
+	speed: 0.012344s/iter; left time: 1094.565030s
+	iters: 1528, epoch: 4 | train_loss : 0.0000
+	speed: 0.012365s/iter; left time: 1091.698943s
+	iters: 1910, epoch: 4 | train_loss : 0.0000
+	speed: 0.012675s/iter; left time: 1114.232264s
+[2024-03-01 15:03:50] [32mIntermediate result: 3.965874295630556e-09  (Index 3)[0m
+Epoch: 4 | cost time: 91.6109528541565 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 5.2201e-05.
+	iters: 382, epoch: 5 | train_loss : 0.0000
+	speed: 0.192485s/iter; left time: 16847.252177s
+	iters: 764, epoch: 5 | train_loss : 0.0000
+	speed: 0.013863s/iter; left time: 1208.075152s
+	iters: 1146, epoch: 5 | train_loss : 0.0000
+	speed: 0.014063s/iter; left time: 1220.117403s
+	iters: 1528, epoch: 5 | train_loss : 0.0000
+	speed: 0.013341s/iter; left time: 1152.415120s
+	iters: 1910, epoch: 5 | train_loss : 0.0000
+	speed: 0.013677s/iter; left time: 1176.220559s
+[2024-03-01 15:05:14] [32mIntermediate result: 3.965874295630556e-09  (Index 4)[0m
+Epoch: 5 | cost time: 83.97975301742554 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 4.4371e-05.
+	iters: 382, epoch: 6 | train_loss : 0.0000
+	speed: 0.162990s/iter; left time: 13954.266651s
+	iters: 764, epoch: 6 | train_loss : 0.0000
+	speed: 0.010664s/iter; left time: 908.899999s
+	iters: 1146, epoch: 6 | train_loss : 0.0000
+	speed: 0.012007s/iter; left time: 1018.797704s
+	iters: 1528, epoch: 6 | train_loss : 0.0000
+	speed: 0.013519s/iter; left time: 1141.910346s
+	iters: 1910, epoch: 6 | train_loss : 0.0000
+	speed: 0.013912s/iter; left time: 1169.804848s
+[2024-03-01 15:06:48] [32mIntermediate result: 3.965874295630556e-09  (Index 5)[0m
+Epoch: 6 | cost time: 94.59779739379883 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 3.7715e-05.
+	iters: 382, epoch: 7 | train_loss : 0.0000
+	speed: 0.198644s/iter; left time: 16627.097808s
+	iters: 764, epoch: 7 | train_loss : 0.0000
+	speed: 0.013543s/iter; left time: 1128.450606s
+	iters: 1146, epoch: 7 | train_loss : 0.0000
+	speed: 0.013865s/iter; left time: 1149.932746s
+	iters: 1528, epoch: 7 | train_loss : 0.0000
+	speed: 0.013438s/iter; left time: 1109.395874s
+	iters: 1910, epoch: 7 | train_loss : 0.0000
+	speed: 0.013276s/iter; left time: 1090.930193s
+[2024-03-01 15:08:23] [32mIntermediate result: 3.965874295630556e-09  (Index 6)[0m
+Epoch: 7 | cost time: 94.43203711509705 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 3.2058e-05.
+	iters: 382, epoch: 8 | train_loss : 0.0000
+	speed: 0.192931s/iter; left time: 15780.194830s
+	iters: 764, epoch: 8 | train_loss : 0.0000
+	speed: 0.012486s/iter; left time: 1016.496974s
+	iters: 1146, epoch: 8 | train_loss : 0.0000
+	speed: 0.011173s/iter; left time: 905.287046s
+	iters: 1528, epoch: 8 | train_loss : 0.0000
+	speed: 0.013552s/iter; left time: 1092.899422s
+	iters: 1910, epoch: 8 | train_loss : 0.0000
+	speed: 0.013935s/iter; left time: 1118.507333s
+[2024-03-01 15:09:44] [32mIntermediate result: 3.965874295630556e-09  (Index 7)[0m
+Epoch: 8 | cost time: 81.55897688865662 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Adjusting learning rate of group 0 to 2.7249e-05.
+	iters: 382, epoch: 9 | train_loss : 0.0000
+	speed: 0.161807s/iter; left time: 12925.292030s
+	iters: 764, epoch: 9 | train_loss : 0.0000
+	speed: 0.011626s/iter; left time: 924.231076s
+	iters: 1146, epoch: 9 | train_loss : 0.0000
+	speed: 0.011861s/iter; left time: 938.392744s
+	iters: 1528, epoch: 9 | train_loss : 0.0000
+	speed: 0.011618s/iter; left time: 914.756944s
+	iters: 1910, epoch: 9 | train_loss : 0.0000
+	speed: 0.010654s/iter; left time: 834.789251s
+[2024-03-01 15:11:09] [32mIntermediate result: 3.965874295630556e-09  (Index 8)[0m
+Epoch: 9 | cost time: 84.61047339439392 | valid_loss: 3.965874295630556e-09 | valid_loss_true: 3.725290298461914e-09
+Early stop with best valid_loss: 3.965874295630556e-09
+[2024-03-01 15:11:09] [32mFinal result: 3.5989722313445327e-09[0m
+>>>>>>>end of training : alumina_lstm/STANDALONE>>>>>>>>>>>>>>>>>>>>>>>>>>

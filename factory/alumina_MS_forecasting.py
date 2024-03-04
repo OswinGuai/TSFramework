@@ -1,6 +1,5 @@
 from factory.forecasting import GeneralForecasting
 from models import *
-from models import TimeXer
 from data.alumina_MS_dataloader import AluminaMSDataset
 from torch.utils.data import DataLoader
 
@@ -9,6 +8,9 @@ import torch.nn as nn
 import time
 import nni
 import pandas as pd
+
+import shap
+import numpy as np
 
 
 class AluminaTransformerMSForecasting(GeneralForecasting):
@@ -88,8 +90,8 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
         return rmse
 
     def eval_metric(self, eval_outputs, truth_values, epoch):
-        eval_outputs = eval_outputs.cpu()
-        truth_values = truth_values.cpu()
+        # eval_outputs = eval_outputs.cpu()
+        # truth_values = truth_values.cpu()
         if self.args.stage=='pretrain':
             if 'itransformer' in self.args.stage or 'patchtst' in self.args.model_id: # itransformer selected or patchtst selected
                 eval_outputs = eval_outputs
@@ -128,6 +130,10 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
     def _forward(self, samples_end, datetimes_enc,  samples_dec, datetimes_dec):
         model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
         return model_outputs
+    
+    # def _forward(self, samples_end,   samples_dec, datetimes_enc=None, datetimes_dec=None):
+    #     model_outputs = self.model(samples_end,   samples_dec, datetimes_enc, datetimes_dec)
+    #     return model_outputs
 
     def predict(self, samples_batch, datetimes_batch):
         samples_enc = samples_batch[:,:self.args.seq_len,:]
@@ -141,6 +147,20 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
         # print("predict output shape:",outputs.shape)
         label_outputs = outputs[:,:,:]
         return label_outputs
+    
+    # def predict(self, samples_batch):
+    #     samples_batch = torch.tensor(samples_batch).to(self.device)
+    #     samples_enc = samples_batch[:,:self.args.seq_len,:]
+    #     #datetimes_enc = datetimes_batch
+    #     B, S, V = samples_enc.shape
+    #     samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
+
+    #     #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, datetimes_enc.shape[2]]).float().to(self.device)), 1)
+    #     #outputs = self._forward(samples_enc, datetimes_enc,  samples_dec, datetimes_dec)
+    #     outputs = self._forward(samples_enc, None,  samples_dec, None)
+    #     # print("predict output shape:",outputs.shape)
+    #     label_outputs = outputs[:,:,:]
+    #     return label_outputs
 
     def batch_loss(self, samples_batch, targets_batch, datetimes_batch, curr_iter):
         
@@ -152,9 +172,18 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
 
         #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([samples_batch.shape[0], self.args.pred_len, 1]).to(self.device).float()), 1)
         outputs = self._forward(samples_enc, None,  samples_dec, None)
+        # outputs = self._forward(samples_enc,  samples_dec)
        
         # import pdb
         # pdb.set_trace()
+        # e = shap.DeepExplainer(self.model(samples_enc, None, samples_dec,None),np.array(samples_batch.cpu()))
+        # e = shap.DeepExplainer(self.model,[samples_enc, samples_dec])
+        # shap_values = e([samples_enc, samples_dec])
+        # e = shap.Explainer(self.predict,(samples_batch,None))
+        # e = shap.KernelExplainer(self.predict,np.array(samples_batch.cpu()))
+        # e = shap.Explainer(self.predict,np.array(samples_batch.cpu()))
+        # shap_values = e.shap_values(np.array(samples_batch[0].cpu()))
+        # shap_values = e((samples_batch,None))
 
         if self.args.stage=='pretrain':
             if 'itransformer' in self.args.model_id or 'patchtst' in self.args.model_id: # itransformer selected or patchtst selected
@@ -208,6 +237,184 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
             
         self.writer.add_scalar('loss/train_loss', train_loss.item(), curr_iter)
         return train_loss
+    
+    def eval(self, epoch):
+        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='valid')
+        self.to_eval()
+        outputs_list = []
+        target_list = []
+        with torch.no_grad():
+            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(valid_loader):
+
+                samples_batch = samples_batch.float().to(self.device)
+                targets_batch = targets_batch.float().to(self.device)
+                # targets_batch = targets_batch.float()
+                datetimes_batch = datetimes_batch.float().to(self.device)
+                if self.args.timestamp_feature != 'none':
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                else:
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
+                outputs_list.append(outputs)
+                target_list.append(targets_batch[:,-self.args.pred_len:,:])
+        predict_outputs = torch.cat(outputs_list, dim=0)
+        target_outputs = torch.cat(target_list, dim=0)
+
+        eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
+        return eval_result
+    
+    def eval_with_test(self, epoch):
+        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='valid')
+        self.to_eval()
+        outputs_list = []
+        target_list = []
+        with torch.no_grad():
+            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(valid_loader):
+
+                samples_batch = samples_batch.float().to(self.device)
+                targets_batch = targets_batch.float().to(self.device)
+                # targets_batch = targets_batch.float()
+                datetimes_batch = datetimes_batch.float().to(self.device)
+                if self.args.timestamp_feature != 'none':
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                else:
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
+                outputs_list.append(outputs)
+                target_list.append(targets_batch[:,-self.args.pred_len:,:])
+        predict_outputs = torch.cat(outputs_list, dim=0)
+        target_outputs = torch.cat(target_list, dim=0)
+
+        eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
+
+        target_scaler = valid_data.target_scaler
+
+        predict_outputs = predict_outputs[:, -1:, :]
+        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
+        predict_outputs = predict_outputs[:,-1:]
+
+        target_outputs = target_outputs[:,-1:,:]
+        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
+        target_outputs = target_outputs[:,-1:]
+
+        eval_result_with_test = self.test_metric(predict_outputs, target_outputs)
+        return eval_result, eval_result_with_test
+    
+    def pretest(self,epoch):
+        # training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
+        test_data, test_loader = self._build_dataloader(self.args, self.args.testset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='test')
+        self.to_eval()
+        outputs_list = []
+        target_list = []
+        with torch.no_grad():
+            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(test_loader):
+                samples_batch = samples_batch.float().to(self.device)
+                targets_batch = targets_batch.float().to(self.device)
+                datetimes_batch = datetimes_batch.float().to(self.device)
+                if self.args.timestamp_feature != 'none':
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                else:
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
+                outputs_list.append(outputs)
+                target_list.append(targets_batch[:,-self.args.seq_len:,:])
+
+        target_scaler = test_data.target_scaler
+        
+        predict_outputs = torch.cat(outputs_list, dim=0)
+        predict_outputs = predict_outputs[:,-1:,:]
+
+        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
+        predict_outputs = predict_outputs[:,-1:]
+
+        target_outputs = torch.cat(target_list, dim=0)
+        target_outputs = target_outputs[:,-1:,:]
+
+        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
+        target_outputs = target_outputs[:,-1:]
+        
+        # predict_outputs = torch.cat(outputs_list, dim=0)
+        # target_outputs = torch.cat(target_list, dim=0)
+
+        data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1])}
+        print("data:",data)
+        # data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2])}
+        df = pd.DataFrame(data)
+        # import pdb
+        # pdb.set_trace()
+        if self.args.target_cols == '1效蒸发器汽温':
+            target_label = 'a'
+        elif self.args.target_cols == '1效蒸发器汽室压力':
+            target_label = 'b'
+        elif self.args.target_cols == '1效原液换热前温度':
+            target_label = 'c'
+        elif self.args.target_cols == '1效出料温度':
+            target_label = 'd'
+        # df.to_excel('%s/%c_%s_%s.xlsx' % (self.args.checkpoints, target_label, self.model_id, epoch))
+        df.to_excel('%s/%s_%s_%s.xlsx' % (self.args.checkpoints, self.model_id, epoch, target_label))
+
+        # todo: track both label and regression loss in testing stage (Not urgent at the moment)
+        if self.args.stage=='train_reg':
+            test_result, reg_test_result = self.test_metric(predict_outputs, target_outputs)
+            print("test result: {} | regression test result: {}. ".format(test_result.item(),reg_test_result.item()))
+        
+        test_result = self.test_metric(predict_outputs, target_outputs)
+        # print("test result: %.3f. " % test_result.item())
+        return test_result
+
+    def test(self, key):
+        self.load_checkpoints(key)
+        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
+        test_data, test_loader = self._build_dataloader(self.args, self.args.testset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='test')
+        self.to_eval()
+        outputs_list = []
+        target_list = []
+        with torch.no_grad():
+            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(test_loader):
+                samples_batch = samples_batch.float().to(self.device)
+                targets_batch = targets_batch.float().to(self.device)
+                datetimes_batch = datetimes_batch.float().to(self.device)
+                if self.args.timestamp_feature != 'none':
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
+                else:
+                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
+                outputs_list.append(outputs)
+                target_list.append(targets_batch[:,-self.args.seq_len:,:])
+
+        target_scaler = test_data.target_scaler
+        #unscale = lambda x: x * target_scaler.var_ + target_scaler.mean_
+        
+        predict_outputs = torch.cat(outputs_list, dim=0)
+        predict_outputs = predict_outputs[:,-1:,:]
+        # * from scratch
+        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
+        # * finetune
+        # predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 57]).cpu())
+        predict_outputs = predict_outputs[:,-1:]
+
+        target_outputs = torch.cat(target_list, dim=0)
+        target_outputs = target_outputs[:,-1:,:]
+        # * from_scratch
+        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
+        # * finetune
+        # target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 57]).cpu())
+        target_outputs = target_outputs[:,-1:]
+        
+        # predict_outputs = torch.cat(outputs_list, dim=0)
+        # target_outputs = torch.cat(target_list, dim=0)
+
+        data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1])}
+        print("data:",data)
+        # data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2])}
+        df = pd.DataFrame(data)
+        df.to_excel('%s/%s_%s.xlsx' % (self.args.checkpoints,self.model_id, self.args.key))
+
+        # todo: track both label and regression loss in testing stage (Not urgent at the moment)
+        if self.args.stage=='train_reg':
+            test_result, reg_test_result = self.test_metric(predict_outputs, target_outputs)
+            print("test result: {} | regression test result: {}. ".format(test_result.item(),reg_test_result.item()))
+        
+        test_result = self.test_metric(predict_outputs, target_outputs)
+        print("test result: %.3f. " % test_result.item())
+        return test_result
+
     
     def prefit(self):
         time_now = time.time()
@@ -351,14 +558,24 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
                     iter_count = 0
                     time_now = time.time()
 
-            valid_loss = self.eval(epoch)
+            # valid_loss = self.eval(epoch)
+            valid_loss, valid_loss_true = self.eval_with_test(epoch)
+            pretest_loss = self.pretest(epoch)
             if 'hpo' in self.args and self.args.hpo == 'optuna':
                 # optuna
                 self.trial.report(valid_loss.item(), epoch)
             elif 'hpo' in self.args and self.args.hpo == 'nni':
                 # nni
                 nni.report_intermediate_result(valid_loss.item())
-            print("Epoch: {} | cost time: {} | valid_loss: {}".format(epoch + 1, time.time() - epoch_time, valid_loss))
+            print("Epoch: {} | cost time: {} | valid_loss: {} | valid_loss_true: {}".format(
+                epoch + 1, 
+                time.time() - epoch_time, 
+                valid_loss,
+                valid_loss_true))
+            print("Pretest loss in this epoch: {}".format(
+                pretest_loss
+            ))
+            
             if best_valid_loss is None or valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
                 self.save_checkpoints(epoch)
@@ -426,83 +643,3 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
         if 'hpo' in self.args and self.args.hpo == 'nni':
             nni.report_final_result(best_valid_loss.item())
         return best_valid_loss.item()
-
-    def eval(self, epoch):
-        valid_data, valid_loader = self._build_dataloader(self.args, self.args.validset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='valid')
-        self.to_eval()
-        outputs_list = []
-        target_list = []
-        with torch.no_grad():
-            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(valid_loader):
-
-                samples_batch = samples_batch.float().to(self.device)
-                targets_batch = targets_batch.float().to(self.device)
-                # targets_batch = targets_batch.float()
-                datetimes_batch = datetimes_batch.float().to(self.device)
-                if self.args.timestamp_feature != 'none':
-                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
-                else:
-                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
-                outputs_list.append(outputs)
-                target_list.append(targets_batch[:,-self.args.pred_len:,:])
-        predict_outputs = torch.cat(outputs_list, dim=0)
-        target_outputs = torch.cat(target_list, dim=0)
-
-        eval_result = self.eval_metric(predict_outputs, target_outputs, epoch)
-        return eval_result
-
-    def test(self, key):
-        self.load_checkpoints(key)
-        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
-        test_data, test_loader = self._build_dataloader(self.args, self.args.testset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='test')
-        self.to_eval()
-        outputs_list = []
-        target_list = []
-        with torch.no_grad():
-            for i, (samples_batch, targets_batch, datetimes_batch) in enumerate(test_loader):
-                samples_batch = samples_batch.float().to(self.device)
-                targets_batch = targets_batch.float().to(self.device)
-                datetimes_batch = datetimes_batch.float().to(self.device)
-                if self.args.timestamp_feature != 'none':
-                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], datetimes_batch[:,:self.args.seq_len,:])
-                else:
-                    outputs = self.predict(samples_batch[:,:self.args.seq_len,:], None)
-                outputs_list.append(outputs)
-                target_list.append(targets_batch[:,-self.args.seq_len:,:])
-
-        target_scaler = test_data.target_scaler
-        #unscale = lambda x: x * target_scaler.var_ + target_scaler.mean_
-        
-        predict_outputs = torch.cat(outputs_list, dim=0)
-        predict_outputs = predict_outputs[:,-1:,:]
-        # * from scratch
-        predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 1]).cpu())
-        # * finetune
-        # predict_outputs = target_scaler.inverse_transform(predict_outputs.reshape([len(outputs_list), 57]).cpu())
-        predict_outputs = predict_outputs[:,-1:]
-
-        target_outputs = torch.cat(target_list, dim=0)
-        target_outputs = target_outputs[:,-1:,:]
-        # * from_scratch
-        target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 1]).cpu())
-        # * finetune
-        # target_outputs = target_scaler.inverse_transform(target_outputs.reshape([len(outputs_list), 57]).cpu())
-        target_outputs = target_outputs[:,-1:]
-        
-        # predict_outputs = torch.cat(outputs_list, dim=0)
-        # target_outputs = torch.cat(target_list, dim=0)
-
-        data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1])}
-        print("data:",data)
-        # data = {'predict': predict_outputs.reshape(predict_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2]), 'groundthuth': target_outputs.reshape(target_outputs.shape[0]*predict_outputs.shape[1],predict_outputs.shape[2])}
-        df = pd.DataFrame(data)
-        df.to_excel('%s/%s_%s.xlsx' % (self.args.checkpoints,self.model_id, self.args.key))
-
-        # todo: track both label and regression loss in testing stage (Not urgent at the moment)
-        if self.args.stage=='train_reg':
-            test_result, reg_test_result = self.test_metric(predict_outputs, target_outputs)
-            print("test result: {} | regression test result: {}. ".format(test_result.item(),reg_test_result.item()))
-        
-        test_result = self.test_metric(predict_outputs, target_outputs)
-        print("test result: %.3f. " % test_result.item())
-        return test_result

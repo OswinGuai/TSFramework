@@ -64,15 +64,15 @@ class Transformer(nn.Module):
 
         self.global_step = 0
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
+    def forward(self, x_enc, x_mark_enc=None, x_dec=None, x_mark_dec=None,
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None, bp_bit=True):
 
-        if self.use_norm:
-            # Normalization from Non-stationary Transformer
-            means = x_enc.mean(1, keepdim=True).detach()
-            x_enc = x_enc - means
-            stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
-            x_enc /= stdev
+        # if self.use_norm:
+        #     # Normalization from Non-stationary Transformer
+        #     means = x_enc.mean(1, keepdim=True).detach()
+        #     x_enc = x_enc - means
+        #     stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
+        #     x_enc /= stdev
 
         enc_out = self.enc_embedding(x_enc)
         if self.timestamp_feature != 'none':
@@ -94,9 +94,9 @@ class Transformer(nn.Module):
 
         self.global_step = self.global_step + 1
 
-        if self.use_norm:
-            # De-Normalization from Non-stationary Transformer
-            dec_out = dec_out * (stdev[:, 0, -1:].unsqueeze(1).repeat(1, self.pred_len, 1))
-            dec_out = dec_out + (means[:, 0, -1:].unsqueeze(1).repeat(1, self.pred_len, 1))
+        # if self.use_norm:
+        #     # De-Normalization from Non-stationary Transformer
+        #     dec_out = dec_out * (stdev[:, 0, -1:].unsqueeze(1).repeat(1, self.pred_len, 1))
+        #     dec_out = dec_out + (means[:, 0, -1:].unsqueeze(1).repeat(1, self.pred_len, 1))
 
         return dec_out[:, -self.pred_len:, :]
