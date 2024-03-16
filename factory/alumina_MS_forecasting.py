@@ -12,6 +12,8 @@ import pandas as pd
 import shap
 import numpy as np
 
+import random
+
 
 class AluminaTransformerMSForecasting(GeneralForecasting):
     model_choices = {
@@ -131,6 +133,19 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
         model_outputs = self.model(samples_end, datetimes_enc,  samples_dec, datetimes_dec)
         return model_outputs
     
+    def ExplainModel(self,samples_batch):
+        samples_enc = samples_batch[:,:self.args.seq_len,:]
+        #datetimes_enc = datetimes_batch
+        B, S, V = samples_enc.shape
+        samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
+
+        #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, datetimes_enc.shape[2]]).float().to(self.device)), 1)
+        #outputs = self._forward(samples_enc, datetimes_enc,  samples_dec, datetimes_dec)
+        outputs = self._forward(samples_enc, None,  samples_dec, None)
+        # print("predict output shape:",outputs.shape)
+        label_outputs = outputs[:,:,:]
+        return label_outputs
+    
     # def _forward(self, samples_end,   samples_dec, datetimes_enc=None, datetimes_dec=None):
     #     model_outputs = self.model(samples_end,   samples_dec, datetimes_enc, datetimes_dec)
     #     return model_outputs
@@ -162,22 +177,69 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
     #     label_outputs = outputs[:,:,:]
     #     return label_outputs
 
+    def explain(self,epoch):
+        training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, 300, key='train')
+        test_data, test_loader = self._build_dataloader(self.args, self.args.testset_csv_path, self.args.batch_size,  key='test')
+        batch = next(iter(training_loader))
+        samples_batch, targets_batch,datetimes_batch = batch
+        samples_enc = samples_batch[:,:self.args.seq_len,:].float().to(self.device)
+        datetimes_enc = torch.zeros([samples_batch.shape[0], self.args.seq_len, 1]).float().to(self.device)
+        B, S, V = samples_enc.shape
+        samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
+        datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([samples_batch.shape[0], self.args.pred_len, 1]).to(self.device).float()), 1)
+        import pdb
+        pdb.set_trace()
+
+        # DeepExplainer
+        '''
+        AssertionError: The SHAP explanations do not sum up to the model's output! 
+        This is either because of a rounding error or because an operator in your computation graph was not fully supported. 
+        If the sum difference of %f is significant compared to the scale of your model outputs, please post as a github issue, with a reproducible example so we can debug it. 
+        Used framework: pytorch - Max. diff: 2.74672215364858 - Tolerance: 0.01
+        '''
+        # background = [samples_enc[0:60,:,:], samples_enc[0:60,:,:], samples_dec[0:60,:,:],samples_dec[0:60,:,:]]
+        # background = [samples_enc[0:60,:,:], datetimes_enc[0:60,:,:], samples_dec[0:60,:,:],datetimes_dec[0:60,:,:]]
+        # marker = samples_enc
+        background = [samples_enc[0:300,:,:], samples_enc[0:300,:,:], samples_dec[0:300,:,:],samples_dec[0:300,:,:]]
+        background = [samples_enc,samples_enc,samples_dec,samples_dec]
+        e = shap.DeepExplainer(self.model, background)
+        test_data = [samples_enc[0:30,:,:], samples_enc[0:30,:,:], samples_dec[0:30,:,:],samples_dec[0:30,:,:]]
+        shap_values = e.shap_values(test_data)
+
+        # KernelExplainer
+        '''
+        The data in our structure should be torch.tensor, but not accepted by shap : TypeError: Unknown type passed as data object: <class 'torch.Tensor'>
+        Turning data into numpy.ndarray will contradict with our embedding strategy: AttributeError: 'numpy.ndarray' object has no attribute 'permute'
+        '''
+        # e = shap.KernelExplainer(self.model.forward, np.array(samples_enc.cpu()))
+
+    
+
     def batch_loss(self, samples_batch, targets_batch, datetimes_batch, curr_iter):
         
         samples_enc = samples_batch[:,:self.args.seq_len,:]
-        #datetimes_enc = torch.zeros([samples_batch.shape[0], self.args.seq_len, 1]).float().to(self.device)
+        datetimes_enc = torch.zeros([samples_batch.shape[0], self.args.seq_len, 1]).float().to(self.device)
         # samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], samples_batch[:, :-self.args.pred_len, :]), 1)
         B, S, V = samples_enc.shape
         samples_dec = torch.cat((samples_enc[:, -self.args.label_len:, :], torch.zeros([B, self.args.pred_len, V]).float().to(self.device)), 1)
 
-        #datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([samples_batch.shape[0], self.args.pred_len, 1]).to(self.device).float()), 1)
+        datetimes_dec = torch.cat((datetimes_enc[:, -self.args.label_len:, :], torch.zeros([samples_batch.shape[0], self.args.pred_len, 1]).to(self.device).float()), 1)
+        # import pdb
+        # pdb.set_trace()
         outputs = self._forward(samples_enc, None,  samples_dec, None)
         # outputs = self._forward(samples_enc,  samples_dec)
        
         # import pdb
         # pdb.set_trace()
+
+        # e = shap.DeepExplainer(self.model,[samples_enc[0:60,:,:], samples_enc[0:60,:,:], samples_dec[0:60,:,:],samples_dec[0:60,:,:]])
+        # shap_values = e.shap_values([samples_enc[61:65,:,:], samples_enc[61:65,:,:], samples_dec[61:65,:,:],samples_dec[61:65,:,:]])
+        # e = shap.DeepExplainer(self.model,[samples_enc[0:60,:,:], datetimes_enc[0:60,:,:], samples_dec[0:60,:,:],datetimes_dec[0:60,:,:]])
+        # shap_values = e.shap_values([samples_enc[1:5,:,:], datetimes_enc[1:5,:,:], samples_dec[1:5,:,:],datetimes_dec[1:5,:,:]])
         # e = shap.DeepExplainer(self.model(samples_enc, None, samples_dec,None),np.array(samples_batch.cpu()))
         # e = shap.DeepExplainer(self.model,[samples_enc, samples_dec])
+        # e = shap.DeepExplainer(self.model,[samples_enc, samples_enc, samples_dec,samples_dec])
+        
         # shap_values = e([samples_enc, samples_dec])
         # e = shap.Explainer(self.predict,(samples_batch,None))
         # e = shap.KernelExplainer(self.predict,np.array(samples_batch.cpu()))
@@ -298,6 +360,7 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
         eval_result_with_test = self.test_metric(predict_outputs, target_outputs)
         return eval_result, eval_result_with_test
     
+   
     def pretest(self,epoch):
         # training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
         test_data, test_loader = self._build_dataloader(self.args, self.args.testset_csv_path, 1, shuffle=False, drop_last=False, init_scaler=False, key='test')
@@ -414,6 +477,8 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
         test_result = self.test_metric(predict_outputs, target_outputs)
         print("test result: %.3f. " % test_result.item())
         return test_result
+    
+    
 
     
     def prefit(self):
@@ -528,7 +593,19 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
     
     def fit_only(self):
         time_now = time.time()
+        # import pdb
+        # pdb.set_trace()
+
+        # if(self.args.random_features==True):
+        #     allfeatures = self.args.feature_cols.split(',')
+        #     random_selected_features = random.sample(allfeatures,self.args.random_features_num)
+        #     print("Random Selected Features: ",random_selected_features)
+        #     self.args.feature_cols = ','.join(random_selected_features)
+        #     print("Feature Columns: ", self.args.feature_cols)
+        print("Feature Columns: ", self.args.feature_cols)
         training_data, training_loader = self._build_dataloader(self.args, self.args.trainset_csv_path, self.args.batch_size, key='train')
+        # import pdb
+        # pdb.set_trace()
         total_iter = 0
         valid_loss = None
         best_valid_loss = None
@@ -544,6 +621,8 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
                 samples_batch = samples_batch.float().to(self.device)
                 targets_batch = targets_batch.float().to(self.device)
                 datetimes_batch = datetimes_batch.float().to(self.device)
+                # import pdb
+                # pdb.set_trace()
                 train_loss = self.batch_loss(samples_batch, targets_batch, datetimes_batch, total_iter)
                 
                 self.backward(train_loss)
@@ -561,6 +640,7 @@ class AluminaTransformerMSForecasting(GeneralForecasting):
             # valid_loss = self.eval(epoch)
             valid_loss, valid_loss_true = self.eval_with_test(epoch)
             pretest_loss = self.pretest(epoch)
+            # shap_value = self.explain(epoch)
             if 'hpo' in self.args and self.args.hpo == 'optuna':
                 # optuna
                 self.trial.report(valid_loss.item(), epoch)

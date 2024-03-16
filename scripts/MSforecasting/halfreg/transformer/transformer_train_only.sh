@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=7
 # for target in {'1效蒸发器汽温','1效蒸发器汽室压力','1效原液换热前温度','1效出料温度'}
 # do
 #     cmd='''python main_nni.py 
@@ -32,7 +32,9 @@ export CUDA_VISIBLE_DEVICES=5
 #     $cmd
 # done
 
-cmd1='''python -u main_nni.py 
+checkpoints_path='./checkpoints/halfreg/transformer'
+
+cmd1="python -u main_nni.py 
     --stage train_only 
     --model_id alumina_transformer
     --model_name alumina_transformer 
@@ -42,7 +44,7 @@ cmd1='''python -u main_nni.py
     --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv
     --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv 
     --datetime_col dtime 
-    --feature_cols '1效蒸发器汽室压力,1效原液换热前温度,1效出料温度,1效蒸发器汽温' 
+    --feature_cols 1效蒸发器汽室压力,1效原液换热前温度,1效出料温度,1效蒸发器汽温
     --target_cols 1效蒸发器汽温
     --seq_len 30 
     --label_len 2 
@@ -51,16 +53,16 @@ cmd1='''python -u main_nni.py
     --train_epochs 50 
     --gpu 0 
     --use_nni
-    --checkpoints ./checkpoints/alumina_transformer_train_only
+    --checkpoints ${checkpoints_path}
     --hidden_dim 128
     --d_model 128
     --e_layers 1
     --d_layers 1
-    '''
+    "
 echo $cmd1
 $cmd1
 
-cmd2='''python -u main_nni.py 
+cmd2="python -u main_nni.py 
     --stage train_only 
     --model_id alumina_transformer
     --model_name alumina_transformer 
@@ -70,7 +72,7 @@ cmd2='''python -u main_nni.py
     --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv
     --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv 
     --datetime_col dtime 
-    --feature_cols '1效原液换热前温度,1效出料温度,1效蒸发器汽温,1效蒸发器汽室压力' 
+    --feature_cols 1效原液换热前温度,1效出料温度,1效蒸发器汽温,1效蒸发器汽室压力
     --target_cols 1效蒸发器汽室压力
     --seq_len 30 
     --label_len 2 
@@ -79,16 +81,16 @@ cmd2='''python -u main_nni.py
     --train_epochs 50 
     --gpu 0 
     --use_nni
-    --checkpoints ./checkpoints/alumina_transformer_train_only
+    --checkpoints ${checkpoints_path}
     --hidden_dim 128
     --d_model 128
     --e_layers 1
     --d_layers 1
-    '''
+    "
 echo $cmd2
 $cmd2
 
-cmd3='''python -u main_nni.py 
+cmd3="python -u main_nni.py 
     --stage train_only 
     --model_id alumina_transformer
     --model_name alumina_transformer 
@@ -98,7 +100,7 @@ cmd3='''python -u main_nni.py
     --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv
     --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv 
     --datetime_col dtime 
-    --feature_cols '1效出料温度,1效蒸发器汽温,1效蒸发器汽室压力,1效原液换热前温度' 
+    --feature_cols 1效出料温度,1效蒸发器汽温,1效蒸发器汽室压力,1效原液换热前温度
     --target_cols 1效原液换热前温度
     --seq_len 30 
     --label_len 2 
@@ -107,17 +109,17 @@ cmd3='''python -u main_nni.py
     --train_epochs 50 
     --gpu 0 
     --use_nni
-    --checkpoints ./checkpoints/alumina_transformer_train_only
+    --checkpoints ${checkpoints_path}
     --hidden_dim 128
     --d_model 128
     --e_layers 1
     --d_layers 1
-    '''
+    "
 echo $cmd3
 $cmd3
 
 
-cmd4='''python -u main_nni.py 
+cmd4="python -u main_nni.py 
     --stage train_only 
     --model_id alumina_transformer
     --model_name alumina_transformer 
@@ -127,7 +129,7 @@ cmd4='''python -u main_nni.py
     --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv
     --testset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_testset_new.csv 
     --datetime_col dtime 
-    --feature_cols '1效蒸发器汽温,1效蒸发器汽室压力,1效原液换热前温度,1效出料温度' 
+    --feature_cols 1效蒸发器汽温,1效蒸发器汽室压力,1效原液换热前温度,1效出料温度
     --target_cols 1效出料温度
     --seq_len 30 
     --label_len 2 
@@ -136,11 +138,11 @@ cmd4='''python -u main_nni.py
     --train_epochs 50 
     --gpu 0 
     --use_nni
-    --checkpoints ./checkpoints/alumina_transformer_train_only
+    --checkpoints ${checkpoints_path}
     --hidden_dim 128
     --d_model 128
     --e_layers 1
     --d_layers 1
-    '''
+    "
 echo $cmd4
 $cmd4

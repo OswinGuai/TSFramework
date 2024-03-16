@@ -42,7 +42,8 @@ parser.add_argument('--datetime_col', type=str, help='')
 parser.add_argument('--feature_cols', type=str, help='')
 parser.add_argument('--target_cols', type=str, help='')
 parser.add_argument('--timestamp_feature', type=str, help='')
-
+parser.add_argument('--random_features',type=bool, default=False, help='Turn this to True if choosing random features in dataset')
+parser.add_argument('--random_features_num',type=int, default=10, help='The number of random selected features, only available when: random_features == True')
 
 parser.add_argument('--seq_len', type=int, default=30, help='input sequence length of encoder')
 parser.add_argument('--label_len', type=int, default=12, help='start token length of decoder')
@@ -82,6 +83,14 @@ base_args.use_gpu = True if torch.cuda.is_available() else False
 def main(params):
 
     args = argparse.Namespace(**params)
+
+    if(args.random_features==True):
+            allfeatures = args.feature_cols.split(',')
+            random_selected_features = random.sample(allfeatures,args.random_features_num)
+            print("Random Selected Features: ",random_selected_features)
+            args.feature_cols = ','.join(random_selected_features) + "," +args.target_cols
+            print("Feature Columns in Main: ", args.feature_cols)
+
     print('Args in experiment:')
     print(args)
     # set experiments

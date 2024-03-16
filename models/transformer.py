@@ -12,7 +12,7 @@ from models.modules.embed import DataEmbedding, DateEmbedding, CycleTimeEmbeddin
 class Transformer(nn.Module):
     def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, pred_len, d_model=512, n_heads=8,
                  e_layers=3, d_layers=2, d_ff=512, dropout=0.5, activation='gelu', output_attention=False,
-                 device=0, timestamp_feature='h',use_norm=1, **kwargs):
+                 device=0, timestamp_feature='none',use_norm=1, **kwargs):
         super(Transformer, self).__init__()
         self.seq_len = seq_len
         self.label_len = label_len

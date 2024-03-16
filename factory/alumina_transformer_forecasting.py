@@ -17,6 +17,7 @@ class AluminaTransformerForecasting(GeneralForecasting):
             'alumina_itransformer': iTransformer,
             'alumina_patchtst': PatchTST,
             'alumina_lstm': LSTM,
+            'alumina_timexer': TimeXer
             }
 
     def __init__(self, args):

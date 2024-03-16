@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=7
 
 
 # python main_nni.py \
@@ -25,6 +25,7 @@ cmd='''python main_nni.py
 --stage train_only 
 --model_id alumina_transformer
 --model_name alumina_transformer 
+--features F
 --log_path log 
 --trainset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_trainset.csv 
 --validset_csv_path /workspace/qiuyunzhong/TSFrameworkData/alumina_validset.csv
